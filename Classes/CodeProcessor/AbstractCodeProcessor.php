@@ -31,7 +31,69 @@ namespace F3\Backporter\CodeProcessor;
  */
 abstract class AbstractCodeProcessor {
 
+	/**
+	 * Namespace of the processed Class
+	 *
+	 * @var string
+	 */
+	protected $classNamespace = '';
+
+	/**
+	 * Extension-key of the target Extension (e.g. my_extension)
+	 *
+	 * @var string
+	 */
+	protected $extensionKey = '';
+
+	/**
+	 * Uppercased Extension-key of the target Extension (e.g. MyExtension)
+	 *
+	 * @var string
+	 */
+	protected $upperCasedExtensionKey = '';
+
+	
+	/**
+	 * Processes the FLOW3 code by calling the respective helper methods.
+	 *
+	 * @param string $inputString
+	 * @return string the processed code
+	 */
 	abstract function processString($inputString);
+
+	/**
+	 * Setter for the classes namespace
+	 *
+	 * @param string $classNamespace
+	 */
+	public function setClassNamespace($classNamespace) {
+		$this->classNamespace = $classNamespace;
+	}
+
+	/**
+	 * Setter for the target extension key
+	 *
+	 * @param string $extensionKey
+	 */
+	public function setExtensionKey($extensionKey) {
+		$this->extensionKey = $extensionKey;
+		$this->upperCasedExtensionKey = $this->upperCaseExtensionKey($extensionKey);
+	}
+
+	/**
+	 * Turns my_extension into MyExtension
+	 *
+	 * @param string $extensionKey
+	 * @return string the upper cased extension key
+	 */
+	protected function upperCaseExtensionKey($extensionKey) {
+		$upperCasedExtensionKey = '';
+		$extensionKeyParts = explode('_', $extensionKey);
+		foreach($extensionKeyParts as $extensionKeyPart) {
+			$upperCasedExtensionKey.= ucfirst($extensionKeyPart);
+		}
+		return $upperCasedExtensionKey;
+	}
 
 	/**
 	 * Removes the line "declare(ENCODING = 'utf-8');" that appears on top of all FLOW3 classes.
@@ -62,6 +124,7 @@ abstract class AbstractCodeProcessor {
 	public function removeGlobalNamespaceSeparators($inputString) {
 		return preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $inputString);
 	}
+
 	
 }
 ?>
