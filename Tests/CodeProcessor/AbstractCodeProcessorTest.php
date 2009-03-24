@@ -37,7 +37,7 @@ class AbstractCodeProcessorTest extends \F3\Testing\BaseTestCase {
 	 */
 	public function UTF8DeclarationCanBeRemoved() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-		
+
 		$inputString = '<?php
 declare(ENCODING = \'utf-8\');
 namespace F3\FLOW3\Cache\Frontend;
@@ -57,7 +57,7 @@ foobar';
 	 */
 	public function NamespaceDeclarationsCanBeRemoved() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-		
+
 		$inputString = '<?php
 declare(ENCODING = \'utf-8\');
 namespace F3\FLOW3\Cache\Frontend;
@@ -77,7 +77,7 @@ foobar';
 	 */
 	public function GlobalNamespaceSeparatorsCanBeRemoved() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-		
+
 		$inputString = 'class FooBar extends \ArrayObject {
 public function someMethod(\ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
 	try {
@@ -93,6 +93,33 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	}
 }';
 		$actualResult = $codeProcessor->removeGlobalNamespaceSeparators($inputString);
+		$this->assertEquals($expectedResult, $actualResult);
+	}
+
+	/**
+	 * @test
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 */
+	public function inlineObjectNamesAreConverted() {
+		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
+
+		$inputString = 'class FooBar extends \F3\Fluid\TestingBla {
+public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+	try {
+		$someOtherFlow3Object = new \F3\Fluid\Subpackage\Bar();
+		$someOtherFlow3Object = objectFactory->create(\'F3\Fluid\Subpackage\Bar\');
+	} catch (\Exception $exception) {
+	}
+}';
+		$expectedResult = 'class FooBar extends Tx_Fluid_TestingBla {
+public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlow3Object) {
+	try {
+		$someOtherFlow3Object = new Tx_Fluid_Subpackage_Bar();
+		$someOtherFlow3Object = objectFactory->create(\'Tx_Fluid_Subpackage_Bar\');
+	} catch (\Exception $exception) {
+	}
+}';
+		$actualResult = $codeProcessor->transformObjectNames($inputString);
 		$this->assertEquals($expectedResult, $actualResult);
 	}
 }

@@ -52,7 +52,7 @@ abstract class AbstractCodeProcessor {
 	 */
 	protected $upperCasedExtensionKey = '';
 
-	
+
 	/**
 	 * Processes the FLOW3 code by calling the respective helper methods.
 	 *
@@ -104,7 +104,7 @@ abstract class AbstractCodeProcessor {
 	public function removeUTF8Declaration($inputString) {
 		return preg_replace('/^declare\(ENCODING = \'utf-8\'\);\n/m', '', $inputString);
 	}
-	
+
 	/**
 	 * Removes the line "namespace F3/Package/Subpackage..." that appears on top of all FLOW3 classes.
 	 *
@@ -114,7 +114,7 @@ abstract class AbstractCodeProcessor {
 	public function removeNamespaceDeclarations($inputString) {
 		return preg_replace('/^namespace\s+.*;\n/m', '', $inputString);
 	}
-	
+
 	/**
 	 * Removes the backslash from global PHP Classes (e.g. \Exception)
 	 *
@@ -125,6 +125,41 @@ abstract class AbstractCodeProcessor {
 		return preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $inputString);
 	}
 
-	
+	/**
+	 * Transforms all namespaced object names into their un-namespaced equivalents.
+	 *
+	 * @param string $inputString
+	 * @return string the modified string
+	 */
+	public function transformObjectNames($inputString) {
+		$regex = '/
+			\\\\?
+			(F3(?:\\\\\w+)+)
+		/x';
+		$that = $this;
+		$out = preg_replace_callback($regex, function($result) use (&$that) {
+			return $that->convertClassNames($result[1]);
+		}, $inputString);
+		echo $out;
+		return $out;
+	}
+
+	public function convertClassNames($oldClassName) {
+		$regex = '/
+			F3\\\\
+			(?P<PackageKey>[A-Za-z]+)
+			(?P<ObjectName>(?:\\\\\w+)+)
+		/x';
+
+		preg_match($regex, $oldClassName, $matches);
+
+		$newClassName = 'Tx_';
+		$newClassName .= ''; // Extension Name
+
+		$newClassName .= str_replace('\\', '_', $matches['ObjectName']);
+
+		return $newClassName;
+	}
+
 }
 ?>
