@@ -71,6 +71,15 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
+	 * Getter for the classes namespace
+	 *
+	 * @return string $classNamespace
+	 */
+	public function getClassNamespace() {
+		return $this->classNamespace;
+	}
+
+	/**
 	 * Setter for the target extension key
 	 *
 	 * @param string $extensionKey
@@ -126,6 +135,22 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
+	 * Turns class MyClass into class Tx_Extension_SupPackage_MyClass
+	 *
+	 * @param string $inputString
+	 * @return string the modified string
+	 */
+	public function transformClassName($inputString) {
+		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z]+)/';
+		$that = $this;
+		$out = preg_replace_callback($regex, function($result) use (&$that) {
+			return $result[1] . $that->convertClassName($that->getClassNamespace() . '\\' . $result[2]);
+		}, $inputString);
+
+		return $out;
+	}
+
+	/**
 	 * Transforms all namespaced object names into their un-namespaced equivalents.
 	 *
 	 * @param string $inputString
@@ -138,13 +163,19 @@ abstract class AbstractCodeProcessor {
 		/x';
 		$that = $this;
 		$out = preg_replace_callback($regex, function($result) use (&$that) {
-			return $that->convertClassNames($result[1]);
+			return $that->convertClassName($result[1]);
 		}, $inputString);
 
 		return $out;
 	}
 
-	public function convertClassNames($oldClassName) {
+	/**
+	 * Converts "SomeClass" into "Tx_MyExtension_Subpackage_SomeClass"
+	 *
+	 * @param string $oldClassName the class name
+	 * @return string the converted class name
+	 */
+	public function convertClassName($oldClassName) {
 		$regex = '/
 			F3\\\\
 			(?P<PackageKey>[A-Za-z]+)

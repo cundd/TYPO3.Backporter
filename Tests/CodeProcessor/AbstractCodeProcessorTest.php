@@ -55,7 +55,7 @@ foobar';
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function NamespaceDeclarationsCanBeRemoved() {
+	public function namespaceDeclarationsCanBeRemoved() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
 
 		$inputString = '<?php
@@ -75,7 +75,7 @@ foobar';
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function GlobalNamespaceSeparatorsCanBeRemoved() {
+	public function globalNamespaceSeparatorsCanBeRemoved() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
 
 		$inputString = 'class FooBar extends \ArrayObject {
@@ -98,7 +98,22 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 
 	/**
 	 * @test
-	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function classNameCanBeTransformed() {
+		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
+		
+		$inputString = 'class SomeClassName implements \F3\Package\Subpackage\SomeInterface';
+		$expectedResult = 'class Tx_ExtensionKey_Subpackage_SomeClassName implements \F3\Package\Subpackage\SomeInterface';
+		$codeProcessor->setClassNamespace('F3\MyPackage\Subpackage');
+		$codeProcessor->setExtensionKey('extension_key');
+		$actualResult = $codeProcessor->transformClassName($inputString);
+		echo $actualResult;
+		$this->assertEquals($expectedResult, $actualResult);
+	}
+	/**
+	 * @test
+	 * @author Sebastian Kurf�rst <sebastian@typo3.org>
 	 */
 	public function inlineObjectNamesAreConverted() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
