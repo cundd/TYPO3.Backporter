@@ -119,6 +119,7 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 	} catch (\Exception $exception) {
 	}
 }';
+		$codeProcessor->setExtensionKey('fluid');
 		$actualResult = $codeProcessor->transformObjectNames($inputString);
 		$this->assertEquals($expectedResult, $actualResult);
 	}

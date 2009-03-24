@@ -140,7 +140,7 @@ abstract class AbstractCodeProcessor {
 		$out = preg_replace_callback($regex, function($result) use (&$that) {
 			return $that->convertClassNames($result[1]);
 		}, $inputString);
-		echo $out;
+
 		return $out;
 	}
 
@@ -154,8 +154,7 @@ abstract class AbstractCodeProcessor {
 		preg_match($regex, $oldClassName, $matches);
 
 		$newClassName = 'Tx_';
-		$newClassName .= ''; // Extension Name
-
+		$newClassName .= $this->upperCasedExtensionKey;
 		$newClassName .= str_replace('\\', '_', $matches['ObjectName']);
 
 		return $newClassName;
