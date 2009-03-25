@@ -31,14 +31,43 @@ namespace F3\Backporter\CodeProcessor;
 
 class AbstractCodeProcessorTest extends \F3\Testing\BaseTestCase {
 
+	protected $codeProcessor;
+
+	public function setUp() {
+		$this->codeProcessor = $this->getMock($this->buildAccessibleProxy('F3\Backporter\CodeProcessor\AbstractCodeProcessor'), array('processCode'), array(), '', FALSE);
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function extensionKeysAreProperlyTransformed() {
+		$extensionKey = 'my_extension_key';
+		$expectedResult = 'MyExtensionKey';
+		$this->assertEquals($expectedResult, $this->codeProcessor->_call('upperCaseExtensionKey', $extensionKey));
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function namespaceCanBeExtractedFromClassCode() {
+		$classCode = '<?php
+declare(ENCODING = \'utf-8\');
+namespace F3\FLOW3\Cache\Frontend;
+
+foobar';
+		$expectedResult = 'F3\FLOW3\Cache\Frontend';
+		$this->codeProcessor->setClassCode($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->getClassNamespace());
+	}
+
 	/**
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function UTF8DeclarationCanBeRemoved() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-
-		$inputString = '<?php
+		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
 namespace F3\FLOW3\Cache\Frontend;
 
@@ -47,8 +76,9 @@ foobar';
 namespace F3\FLOW3\Cache\Frontend;
 
 foobar';
-		$actualResult = $codeProcessor->removeUTF8Declaration($inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->removeUTF8Declaration($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
 	/**
@@ -56,9 +86,7 @@ foobar';
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function namespaceDeclarationsCanBeRemoved() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-
-		$inputString = '<?php
+		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
 namespace F3\FLOW3\Cache\Frontend;
 
@@ -67,8 +95,9 @@ foobar';
 declare(ENCODING = \'utf-8\');
 
 foobar';
-		$actualResult = $codeProcessor->removeNamespaceDeclarations($inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->removeNamespaceDeclarations();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
 	/**
@@ -76,9 +105,7 @@ foobar';
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function globalNamespaceSeparatorsCanBeRemoved() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-
-		$inputString = 'class FooBar extends \ArrayObject {
+		$classCode = 'class FooBar extends \ArrayObject {
 public function someMethod(\ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
 	try {
 		$someOtherFlow3Object = new \F3\FLOW3\Subpackage\Bar();
@@ -92,8 +119,9 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	} catch (Exception $exception) {
 	}
 }';
-		$actualResult = $codeProcessor->removeGlobalNamespaceSeparators($inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->removeGlobalNamespaceSeparators();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
 	/**
@@ -101,14 +129,13 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function classNameCanBeTransformed() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-		
-		$inputString = 'class SomeClassName implements \F3\Package\Subpackage\SomeInterface';
+		$classCode = 'class SomeClassName implements \F3\Package\Subpackage\SomeInterface';
 		$expectedResult = 'class Tx_ExtensionKey_Subpackage_SomeClassName implements \F3\Package\Subpackage\SomeInterface';
-		$codeProcessor->setClassNamespace('F3\MyPackage\Subpackage');
-		$codeProcessor->setExtensionKey('extension_key');
-		$actualResult = $codeProcessor->transformClassName($inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setExtensionKey('extension_key');
+		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->transformClassName();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
 	/**
@@ -116,9 +143,7 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function inlineObjectNamesAreConverted() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-
-		$inputString = 'class FooBar extends \F3\Fluid\TestingBla {
+		$classCode = 'class FooBar extends \F3\Fluid\TestingBla {
 public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 	try {
 		$someOtherFlow3Object = new \F3\Fluid\Subpackage\Bar();
@@ -134,9 +159,11 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 	} catch (\Exception $exception) {
 	}
 }';
-		$codeProcessor->setExtensionKey('fluid');
-		$actualResult = $codeProcessor->transformObjectNames($inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setExtensionKey('fluid');
+		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->transformObjectNames();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
 	/**
@@ -144,12 +171,11 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function stringCanBeReplaced() {
-		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
-		
-		$inputString = 'Foo bar foo Foo';
+		$classCode = 'Foo bar foo Foo';
 		$expectedResult = 'Bar bar foo Bar';
-		$actualResult = $codeProcessor->replaceString('Foo', 'Bar', $inputString);
-		$this->assertEquals($expectedResult, $actualResult);
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->replaceString('Foo', 'Bar');
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 }
 

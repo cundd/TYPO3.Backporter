@@ -32,11 +32,25 @@ namespace F3\Backporter\CodeProcessor;
 abstract class AbstractCodeProcessor {
 
 	/**
+	 * Unmodified FLOW3 class code.
+	 *
+	 * @var string
+	 */
+	protected $originalClassCode = '';
+
+	/**
+	 * The processed FLOW3 class code.
+	 *
+	 * @var string
+	 */
+	protected $processedClassCode = '';
+
+	/**
 	 * Namespace of the processed Class
 	 *
 	 * @var string
 	 */
-	protected $classNamespace = '';
+	protected $classNamespace = NULL;
 
 	/**
 	 * Extension-key of the target Extension (e.g. my_extension)
@@ -52,19 +66,29 @@ abstract class AbstractCodeProcessor {
 	 */
 	protected $upperCasedExtensionKey = '';
 
+	/**
+	 * Setter for the FLOW3 class code.
+	 * 
+	 * @param string $classCode the FLOW3 class code to be processed.
+	 * @return string the processed code
+	 */
+	public function setClassCode($classCode) {
+		$this->processedClassCode = $this->originalClassCode = $classCode;
+	}
 
 	/**
 	 * Processes the FLOW3 code by calling the respective helper methods.
 	 *
-	 * @param string $inputString
+	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
 	 * @return string the processed code
 	 */
-	abstract function processString($inputString);
+	abstract function processCode(array $replacePairs = array());
 
 	/**
 	 * Setter for the classes namespace
 	 *
 	 * @param string $classNamespace
+	 * @return void
 	 */
 	public function setClassNamespace($classNamespace) {
 		$this->classNamespace = $classNamespace;
@@ -76,7 +100,21 @@ abstract class AbstractCodeProcessor {
 	 * @return string $classNamespace
 	 */
 	public function getClassNamespace() {
+		if ($this->classNamespace === NULL) {
+			$this->classNamespace = $this->findClassNamespace();
+		}
 		return $this->classNamespace;
+	}
+
+	/**
+	 * Extracts the classes namespace
+	 *
+	 * @return string the extracted Class namespace
+	 */
+	protected function findClassNamespace() {
+		$matches = array();
+		preg_match('/^namespace\s+(.*);/m', $this->originalClassCode, $matches);
+		return $matches[1];
 	}
 
 	/**
@@ -107,71 +145,62 @@ abstract class AbstractCodeProcessor {
 	/**
 	 * Removes the line "declare(ENCODING = 'utf-8');" that appears on top of all FLOW3 classes.
 	 *
-	 * @param string $inputString
 	 * @return string the modified string
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function removeUTF8Declaration($inputString) {
-		return preg_replace('/^declare\(ENCODING = \'utf-8\'\);\n/m', '', $inputString);
+	public function removeUTF8Declaration() {
+		$this->processedClassCode = preg_replace('/^declare\(ENCODING = \'utf-8\'\);\n/m', '', $this->processedClassCode);
 	}
 
 	/**
 	 * Removes the line "namespace F3/Package/Subpackage..." that appears on top of all FLOW3 classes.
 	 *
-	 * @param string $inputString
-	 * @return string the modified string
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function removeNamespaceDeclarations($inputString) {
-		return preg_replace('/^namespace\s+.*;\n/m', '', $inputString);
+	public function removeNamespaceDeclarations() {
+		$this->processedClassCode = preg_replace('/^namespace\s+.*;\n/m', '', $this->processedClassCode);
 	}
 
 	/**
 	 * Removes the backslash from global PHP Classes (e.g. \Exception)
 	 *
-	 * @param string $inputString
-	 * @return string the modified string
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function removeGlobalNamespaceSeparators($inputString) {
-		return preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $inputString);
+	public function removeGlobalNamespaceSeparators() {
+		$this->processedClassCode = preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $this->processedClassCode);
 	}
 
 	/**
 	 * Turns class MyClass into class Tx_Extension_SupPackage_MyClass
 	 *
-	 * @param string $inputString
-	 * @return string the modified string
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function transformClassName($inputString) {
+	public function transformClassName() {
 		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z]+)/';
 		$that = $this;
-		$out = preg_replace_callback($regex, function($result) use (&$that) {
+		$this->processedClassCode = preg_replace_callback($regex, function($result) use (&$that) {
 			return $result[1] . $that->convertClassName($that->getClassNamespace() . '\\' . $result[2]);
-		}, $inputString);
-
-		return $out;
+		}, $this->processedClassCode);
 	}
 
 	/**
 	 * Transforms all namespaced object names into their un-namespaced equivalents.
 	 *
-	 * @param string $inputString
-	 * @return string the modified string
+	 * @return void
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
-	public function transformObjectNames($inputString) {
+	public function transformObjectNames() {
 		$regex = '/
 			\\\\?
 			(F3(?:\\\\\w+)+)
 		/x';
 		$that = $this;
-		$out = preg_replace_callback($regex, function($result) use (&$that) {
+		$this->processedClassCode = preg_replace_callback($regex, function($result) use (&$that) {
 			return $that->convertClassName($result[1]);
-		}, $inputString);
-
-		return $out;
+		}, $this->processedClassCode);
 	}
 
 	/**
@@ -202,13 +231,11 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $searchString string to search for
 	 * @param string $replaceString replacing string
-	 * @param string $inputString
-	 * @return string the modified string
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function replaceString($searchString, $replaceString, $inputString) {
-		return str_replace($searchString, $replaceString, $inputString);
+	public function replaceString($searchString, $replaceString) {
+		$this->processedClassCode = str_replace($searchString, $replaceString, $this->processedClassCode);
 	}
-
 }
 ?>
