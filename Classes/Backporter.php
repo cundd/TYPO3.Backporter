@@ -51,6 +51,13 @@ class Backporter {
 	protected $extensionKey = '';
 
 	/**
+	 * An array containing strings to be replaced. Key = search string, value = replacement string.
+	 *
+	 * @var array
+	 */
+	protected $replacePairs = array();
+
+	/**
 	 * @var \F3\FLOW3\Object\ManagerInterface A reference to the Object Manager
 	 */
 	protected $objectManager;
@@ -84,6 +91,16 @@ class Backporter {
 	}
 
 	/**
+	 * Setter for the target extension key
+	 *
+	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function setReplacePairs(array $replacePairs) {
+		$this->replacePairs = $replacePairs;
+	}
+
+	/**
 	 * Loads all files in $sourcePath, transforms and stores them in $targetPath
 	 *
 	 * @param string $sourcePath Absolute path of the source file directory
@@ -104,7 +121,7 @@ class Backporter {
 			$targetFilename = \F3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
 			\F3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
-			file_put_contents($targetFilename, $codeProcessor->processCode());
+			file_put_contents($targetFilename, $codeProcessor->processCode($this->replacePairs));
 		}
 	}
 
