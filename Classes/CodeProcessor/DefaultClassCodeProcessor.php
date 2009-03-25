@@ -37,6 +37,7 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 	 * @param string $inputString
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
 	 * @return string the processed code
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function processCode(array $replacePairs = array()) {
 		$this->removeUTF8Declaration();
@@ -44,9 +45,7 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 		$this->removeGlobalNamespaceSeparators();
 		$this->transformClassName();
 		$this->transformObjectNames();
-		foreach($replacePairs as $searchString => $replaceString) {
-			$this->replaceString($searchString, $replaceString);
-		}
+		$this->replaceStrings($replacePairs);
 		return $this->processedClassCode;
 	}
 

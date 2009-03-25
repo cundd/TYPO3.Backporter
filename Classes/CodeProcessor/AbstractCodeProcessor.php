@@ -71,9 +71,11 @@ abstract class AbstractCodeProcessor {
 	 * 
 	 * @param string $classCode the FLOW3 class code to be processed.
 	 * @return string the processed code
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setClassCode($classCode) {
 		$this->processedClassCode = $this->originalClassCode = $classCode;
+		$this->classNamespace = NULL;
 	}
 
 	/**
@@ -89,6 +91,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $classNamespace
 	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setClassNamespace($classNamespace) {
 		$this->classNamespace = $classNamespace;
@@ -98,6 +101,7 @@ abstract class AbstractCodeProcessor {
 	 * Getter for the classes namespace
 	 *
 	 * @return string $classNamespace
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function getClassNamespace() {
 		if ($this->classNamespace === NULL) {
@@ -110,6 +114,7 @@ abstract class AbstractCodeProcessor {
 	 * Extracts the classes namespace
 	 *
 	 * @return string the extracted Class namespace
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	protected function findClassNamespace() {
 		$matches = array();
@@ -121,6 +126,7 @@ abstract class AbstractCodeProcessor {
 	 * Setter for the target extension key
 	 *
 	 * @param string $extensionKey
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setExtensionKey($extensionKey) {
 		$this->extensionKey = $extensionKey;
@@ -132,6 +138,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $extensionKey
 	 * @return string the upper cased extension key
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	protected function upperCaseExtensionKey($extensionKey) {
 		$upperCasedExtensionKey = '';
@@ -224,6 +231,20 @@ abstract class AbstractCodeProcessor {
 		$newClassName .= str_replace('\\', '_', $matches['ObjectName']);
 
 		return $newClassName;
+	}
+
+	/**
+	 * Replaces all occurences of search strings in $replacePairs by their replace strings.
+	 *
+	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @return void
+	 * @see replaceString()
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function replaceStrings(array $replacePairs = array()) {
+		foreach($replacePairs as $searchString => $replaceString) {
+			$this->replaceString($searchString, $replaceString);
+		}
 	}
 
 	/**
