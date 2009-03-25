@@ -109,6 +109,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $inputString
 	 * @return string the modified string
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeUTF8Declaration($inputString) {
 		return preg_replace('/^declare\(ENCODING = \'utf-8\'\);\n/m', '', $inputString);
@@ -119,6 +120,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $inputString
 	 * @return string the modified string
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeNamespaceDeclarations($inputString) {
 		return preg_replace('/^namespace\s+.*;\n/m', '', $inputString);
@@ -129,6 +131,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $inputString
 	 * @return string the modified string
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeGlobalNamespaceSeparators($inputString) {
 		return preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $inputString);
@@ -139,6 +142,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $inputString
 	 * @return string the modified string
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function transformClassName($inputString) {
 		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z]+)/';
@@ -155,6 +159,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $inputString
 	 * @return string the modified string
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function transformObjectNames($inputString) {
 		$regex = '/
@@ -174,6 +179,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $oldClassName the class name
 	 * @return string the converted class name
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function convertClassName($oldClassName) {
 		$regex = '/
@@ -189,6 +195,19 @@ abstract class AbstractCodeProcessor {
 		$newClassName .= str_replace('\\', '_', $matches['ObjectName']);
 
 		return $newClassName;
+	}
+
+	/**
+	 * Replaces all occurences of $searchString by $replaceString
+	 *
+	 * @param string $searchString string to search for
+	 * @param string $replaceString replacing string
+	 * @param string $inputString
+	 * @return string the modified string
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function replaceString($searchString, $replaceString, $inputString) {
+		return str_replace($searchString, $replaceString, $inputString);
 	}
 
 }

@@ -108,12 +108,12 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 		$codeProcessor->setClassNamespace('F3\MyPackage\Subpackage');
 		$codeProcessor->setExtensionKey('extension_key');
 		$actualResult = $codeProcessor->transformClassName($inputString);
-		echo $actualResult;
 		$this->assertEquals($expectedResult, $actualResult);
 	}
+
 	/**
 	 * @test
-	 * @author Sebastian Kurf�rst <sebastian@typo3.org>
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function inlineObjectNamesAreConverted() {
 		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
@@ -136,6 +136,19 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 }';
 		$codeProcessor->setExtensionKey('fluid');
 		$actualResult = $codeProcessor->transformObjectNames($inputString);
+		$this->assertEquals($expectedResult, $actualResult);
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function stringCanBeReplaced() {
+		$codeProcessor = $this->getMock('F3\Backporter\CodeProcessor\AbstractCodeProcessor', array('processString'), array(), '', FALSE);
+		
+		$inputString = 'Foo bar foo Foo';
+		$expectedResult = 'Bar bar foo Bar';
+		$actualResult = $codeProcessor->replaceString('Foo', 'Bar', $inputString);
 		$this->assertEquals($expectedResult, $actualResult);
 	}
 }
