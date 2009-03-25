@@ -40,12 +40,12 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function processCode(array $replacePairs = array()) {
+		$this->replaceStrings($replacePairs);
 		$this->removeUTF8Declaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
 		$this->transformClassName();
 		$this->transformObjectNames();
-		$this->replaceStrings($replacePairs);
 		return $this->processedClassCode;
 	}
 

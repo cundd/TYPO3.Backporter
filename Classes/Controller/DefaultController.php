@@ -30,17 +30,23 @@ namespace F3\Backporter\Controller;
  */
 class DefaultController extends \F3\FLOW3\MVC\Controller\ActionController {
 
-	protected $defaultViewObjectName = 'F3\Fluid\View\TemplateView';
-	
-	public function indexAction() {
-	}
+	/**
+	 * Defines the supported request types of this controller
+	 *
+	 * @var array
+	 */
+	protected $supportedRequestTypes = array('F3\FLOW3\MVC\CLI\Request');
 
 	/*
 	 * @param string $sourcePath
 	 * @param string $targetPath
+	 * @param string $extensionKey
 	 */
-	public function backportAction($sourcePath, $targetPath) {
-		// todo
+	public function indexAction($sourcePath, $targetPath, $extensionKey) {
+		$backporter = $this->objectManager->getObject('F3\Backporter\Backporter');
+		$backporter->setExtensionKey($extensionKey);
+		$backporter->processFiles($sourcePath, $targetPath);
+		return 'files backported.';
 	}
 }
 ?>

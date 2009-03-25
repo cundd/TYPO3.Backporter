@@ -129,11 +129,11 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function classNameCanBeTransformed() {
-		$classCode = 'class SomeClassName implements \F3\Package\Subpackage\SomeInterface';
-		$expectedResult = 'class Tx_ExtensionKey_Subpackage_SomeClassName implements \F3\Package\Subpackage\SomeInterface';
+		$classCode = 'class Some123ClassName implements \F3\Package\Subpackage\SomeInterface';
+		$expectedResult = 'class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Package\Subpackage\SomeInterface';
+		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('extension_key');
 		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
-		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->transformClassName();
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
@@ -142,12 +142,12 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	 * @test
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
-	public function inlineObjectNamesAreConverted() {
+	public function objectNamesAreConverted() {
 		$classCode = 'class FooBar extends \F3\Fluid\TestingBla {
 public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 	try {
 		$someOtherFlow3Object = new \F3\Fluid\Subpackage\Bar();
-		$someOtherFlow3Object = objectFactory->create(\'F3\Fluid\Subpackage\Bar\');
+		$someOtherFlow3Object = objectFactory->create(\'F3\FLOW3\Subpackage\Bar\');
 	} catch (\Exception $exception) {
 	}
 }';
@@ -159,9 +159,9 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 	} catch (\Exception $exception) {
 	}
 }';
+		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('fluid');
 		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
-		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->transformObjectNames();
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
@@ -175,6 +175,18 @@ public function someMethod($arguments, Tx_Fluid_Subpackage_FooInterface $someFlo
 		$expectedResult = 'Bar bar foo Bar';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->replaceString('Foo', 'Bar');
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function multipleStringsCanBeReplaced() {
+		$classCode = 'Foo bar foo Foo';
+		$expectedResult = 'Bar foo foo Bar';
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->replaceStrings(array('Foo' => 'Bar', 'bar' => 'foo'));
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 }

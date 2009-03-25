@@ -176,7 +176,7 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeGlobalNamespaceSeparators() {
-		$this->processedClassCode = preg_replace('/([\( ])\\\\([a-zA-Z]{3,} )/', '$1$2', $this->processedClassCode);
+		$this->processedClassCode = preg_replace('/([\( ])\\\\([a-zA-Z0-9]{3,} )/', '$1$2', $this->processedClassCode);
 	}
 
 	/**
@@ -186,7 +186,7 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function transformClassName() {
-		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z]+)/';
+		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z0-9]+)/';
 		$that = $this;
 		$this->processedClassCode = preg_replace_callback($regex, function($result) use (&$that) {
 			return $result[1] . $that->convertClassName($that->getClassNamespace() . '\\' . $result[2]);
@@ -220,7 +220,7 @@ abstract class AbstractCodeProcessor {
 	public function convertClassName($oldClassName) {
 		$regex = '/
 			F3\\\\
-			(?P<PackageKey>[A-Za-z]+)
+			(?P<PackageKey>[A-Za-z0-9]+)
 			(?P<ObjectName>(?:\\\\\w+)+)
 		/x';
 
