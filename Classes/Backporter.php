@@ -70,6 +70,13 @@ class Backporter {
 	protected $sourceFilenames = array();
 
 	/**
+	 * An array of filenames (relative to sourcePath) to be excluded from backporting process.
+	 *
+	 * @var array
+	 */
+	protected $excludedFiles = array();
+
+	/**
 	 * Injects the object manager
 	 *
 	 * @param \F3\FLOW3\Object\ManagerInterface $objectManager A reference to the object manager
@@ -101,6 +108,16 @@ class Backporter {
 	}
 
 	/**
+	 * Setter for filenames to be excluded from backporting process.
+	 *
+	 * @param array $excludedFiles an array containing filenames to be replaced. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function setExcludedFiles(array $excludedFiles) {
+		$this->excludedFiles = $excludedFiles;
+	}
+
+	/**
 	 * Loads all files in $sourcePath, transforms and stores them in $targetPath
 	 *
 	 * @param string $sourcePath Absolute path of the source file directory
@@ -118,6 +135,9 @@ class Backporter {
 		foreach($this->sourceFilenames as $sourceFilename) {
 			$classCode = \F3\FLOW3\Utility\Files::getFileContents($sourceFilename);
 			$relativeFilePath = substr($sourceFilename, strlen($this->sourcePath) + 1);
+			if (in_array($relativeFilePath, $this->excludedFiles)) {
+				continue;
+			}
 			$targetFilename = \F3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
 			\F3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);

@@ -58,14 +58,6 @@ class BackporterTest extends \F3\Testing\BaseTestCase {
 		$this->backporter->setTargetPath('NonExistingPath');
 	}
 
-	/**
-	 * @test
-	 * @expectedException \F3\Backporter\Exception\InvalidPathException
-	 * @author Bastian Waidelich <bastian@typo3.org>
-	 */
-	public function SetTargetPaththrowsExceptionIfTargetPathIsNotEmpty() {
-		$this->backporter->setTargetPath(__DIR__);
-	}
 }
 
 
