@@ -68,7 +68,7 @@ abstract class AbstractCodeProcessor {
 
 	/**
 	 * Setter for the FLOW3 class code.
-	 * 
+	 *
 	 * @param string $classCode the FLOW3 class code to be processed.
 	 * @return string the processed code
 	 * @author Bastian Waidelich <bastian@typo3.org>
@@ -176,7 +176,7 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeGlobalNamespaceSeparators() {
-		$this->processedClassCode = preg_replace('/([\( ])\\\\([a-zA-Z0-9]{3,} )/', '$1$2', $this->processedClassCode);
+		$this->processedClassCode = preg_replace('/([( ])\\\\([a-zA-Z0-9]{3,}[ (])/', '$1$2', $this->processedClassCode);
 	}
 
 	/**
