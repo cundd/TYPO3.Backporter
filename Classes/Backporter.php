@@ -112,7 +112,7 @@ class Backporter {
 		$this->setSourcePath($sourcePath);
 		$this->setTargetPath($targetPath);
 		$this->findSourceFilenames();
-		
+
 		$codeProcessor = $this->objectManager->getObject('F3\Backporter\CodeProcessor\DefaultClassCodeProcessor');
 		$codeProcessor->setExtensionKey($this->extensionKey);
 		foreach($this->sourceFilenames as $sourceFilename) {
@@ -161,9 +161,6 @@ class Backporter {
 		}
 		if (!is_writable($targetPath)) {
 			throw new \F3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not writable');
-		}
-		if (count(\F3\FLOW3\Utility\Files::readDirectoryRecursively($targetPath)) > 0) {
-			throw new \F3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not empty');
 		}
 		$this->targetPath = rtrim($targetPath, '/');
 	}
