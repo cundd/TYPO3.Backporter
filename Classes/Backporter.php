@@ -70,11 +70,11 @@ class Backporter {
 	protected $sourceFilenames = array();
 
 	/**
-	 * An array of filenames (relative to sourcePath) to be excluded from backporting process.
+	 * An array of regular expressions filenames will be matched against, to determine whether this file should be processed.
 	 *
 	 * @var array
 	 */
-	protected $excludedFiles = array();
+	protected $includeFilePattern = array();
 
 	/**
 	 * Injects the object manager
@@ -110,11 +110,11 @@ class Backporter {
 	/**
 	 * Setter for filenames to be excluded from backporting process.
 	 *
-	 * @param array $excludedFiles an array containing filenames to be replaced. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
+	 * @param array $includedFilePattern an array of PCREs which will be used to determine the files to be converted. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function setExcludedFiles(array $excludedFiles) {
-		$this->excludedFiles = $excludedFiles;
+	public function setIncludeFilePattern(array $includeFilePattern) {
+		$this->includeFilePattern = $includeFilePattern;
 	}
 
 	/**
@@ -135,7 +135,8 @@ class Backporter {
 		foreach($this->sourceFilenames as $sourceFilename) {
 			$classCode = \F3\FLOW3\Utility\Files::getFileContents($sourceFilename);
 			$relativeFilePath = substr($sourceFilename, strlen($this->sourcePath) + 1);
-			if (in_array($relativeFilePath, $this->excludedFiles)) {
+
+			if (!$this->shouldFileBeProcessed($relativeFilePath)) {
 				continue;
 			}
 			$targetFilename = \F3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
@@ -143,6 +144,18 @@ class Backporter {
 			$codeProcessor->setClassCode($classCode);
 			file_put_contents($targetFilename, $codeProcessor->processCode($this->replacePairs));
 		}
+	}
+
+	/**
+	 * Return TRUE if current file should be processed, thus, if file matches with one of the RegEx given in $this->includeFilePattern
+	 */
+	protected function shouldFileBeProcessed($relativeFilePath) {
+		foreach ($this->includeFilePattern as $singleFilePattern) {
+			if (preg_match($singleFilePattern, $relativeFilePath)) {
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
 
 	/**
