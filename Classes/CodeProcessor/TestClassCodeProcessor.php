@@ -22,14 +22,14 @@ namespace F3\Backporter\CodeProcessor;
  */
 
 /**
- * Default Backporter
+ * Backporter for Test Classes
  *
  * @package Backporter
  * @subpackage CodeProcessor
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCodeProcessor {
+class TestClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCodeProcessor {
 
 	/**
 	 * Processes the FLOW3 code by calling the respective helper methods.
@@ -41,6 +41,9 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 	 */
 	public function processCode(array $replacePairs = array()) {
 		$this->replaceStrings($replacePairs);
+		$this->prefixMethodNames('test_', array('protected function ', 'private function '), array('setUp', 'tearDown'));
+		$this->suffixClassName('_testcase');
+		$this->addClassHeader('require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));');
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();

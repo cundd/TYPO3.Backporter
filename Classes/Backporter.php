@@ -44,11 +44,25 @@ class Backporter {
 	protected $targetPath;
 
 	/**
+	 * Specifies whether the target directory should be emptied before files are processed
+	 *
+	 * @var boolean
+	 */
+	protected $emptyTargetPath = FALSE;
+
+	/**
 	 * Extension-key of the target Extension (e.g. my_extension)
 	 *
 	 * @var string
 	 */
 	protected $extensionKey = '';
+
+	/**
+	 * Classname of the code processor
+	 *
+	 * @var string
+	 */
+	protected $codeProcessorClassName = 'F3\Backporter\CodeProcessor\DefaultClassCodeProcessor';
 
 	/**
 	 * An array containing strings to be replaced. Key = search string, value = replacement string.
@@ -74,7 +88,21 @@ class Backporter {
 	 *
 	 * @var array
 	 */
-	protected $includeFilePattern = array();
+	protected $includeFilePatterns = array();
+
+	/**
+	 * An array of regular expressions filenames will be matched against, to determine whether this file should be excluded.
+	 *
+	 * @var array
+	 */
+	protected $excludeFilePatterns = array();
+
+	/**
+	 * An array of regular expressions to rename target files.
+	 *
+	 * @var array
+	 */
+	protected $renameFilenamePatterns = array();
 
 	/**
 	 * Injects the object manager
@@ -91,6 +119,7 @@ class Backporter {
 	 * Setter for the target extension key
 	 *
 	 * @param string $extensionKey
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setExtensionKey($extensionKey) {
@@ -98,9 +127,21 @@ class Backporter {
 	}
 
 	/**
+	 * Setter for the code processor class name
+	 *
+	 * @param string $extensionKey
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function setCodeProcessorClassName($codeProcessorClassName) {
+		$this->codeProcessorClassName = $codeProcessorClassName;
+	}
+
+	/**
 	 * Setter for the target extension key
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setReplacePairs(array $replacePairs) {
@@ -108,13 +149,50 @@ class Backporter {
 	}
 
 	/**
-	 * Setter for filenames to be excluded from backporting process.
+	 * Setter for filenames to be included to backporting process.
 	 *
-	 * @param array $includedFilePattern an array of PCREs which will be used to determine the files to be converted. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
+	 * @param array $includeFilePatterns an array of PCREs which will be used to determine the files to be converted. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 */
+	public function setIncludeFilePatterns(array $includeFilePatterns) {
+		$this->includeFilePatterns = $includeFilePatterns;
+	}
+
+	/**
+	 * Setter for filenames to be excluded from backporting process (overrules includeFilePattern)
+	 *
+	 * @param array $excludeFilePatterns an array of PCREs which will be used to determine the files to be exluded from conversion. Filenames are relative to the target path, e.g. "Folder/Subfolder/File.php"
+	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function setIncludeFilePattern(array $includeFilePattern) {
-		$this->includeFilePattern = $includeFilePattern;
+	public function setExcludeFilePatterns(array $excludeFilePatterns) {
+		$this->excludeFilePatterns = $excludeFilePatterns;
+	}
+
+	/**
+	 * Setter for filename renamings.
+	 * Array key will be replaced by array value.
+	 * eg: array('/(.*).php/' => '$1_suffix.php')
+	 *
+	 * @param array $renameFilePatterns an array of PCREs which will be used to rename target filenames.
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function setRenameFilenamePatterns(array $renameFilenamePatterns) {
+		$this->renameFilenamePatterns = $renameFilenamePatterns;
+	}
+
+	/**
+	 * Setter for filenames to be excluded from backporting process.
+	 *
+	 * @param boolean $emptyTargetPath if TRUE, target directory will be emptied before files are processed.
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function emptyTargetPath($emptyTargetPath) {
+		$this->emptyTargetPath = $emptyTargetPath;
 	}
 
 	/**
@@ -128,9 +206,12 @@ class Backporter {
 	public function processFiles($sourcePath, $targetPath) {
 		$this->setSourcePath($sourcePath);
 		$this->setTargetPath($targetPath);
+		if ($this->emptyTargetPath) {
+			\F3\FLOW3\Utility\Files::emptyDirectoryRecursively($this->targetPath);
+		}
 		$this->findSourceFilenames();
 
-		$codeProcessor = $this->objectManager->getObject('F3\Backporter\CodeProcessor\DefaultClassCodeProcessor');
+		$codeProcessor = $this->objectManager->getObject($this->codeProcessorClassName);
 		$codeProcessor->setExtensionKey($this->extensionKey);
 		foreach($this->sourceFilenames as $sourceFilename) {
 			$classCode = \F3\FLOW3\Utility\Files::getFileContents($sourceFilename);
@@ -140,6 +221,7 @@ class Backporter {
 				continue;
 			}
 			$targetFilename = \F3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
+			$targetFilename = $this->renameTargetFilename($targetFilename);
 			\F3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
 			file_put_contents($targetFilename, $codeProcessor->processCode($this->replacePairs));
@@ -147,15 +229,42 @@ class Backporter {
 	}
 
 	/**
-	 * Return TRUE if current file should be processed, thus, if file matches with one of the RegEx given in $this->includeFilePattern
+	 * Return TRUE if current file should be processed.
+	 * A file will be included if
+	 * 1. relative file path does not match with one of the RegEx given in $this->excludeFilePatterns and
+	 * 2. relative file path does match with one of the RegEx given in $this->includeFilePatterns
+	 * 
+	 * @param $relativeFilePath relative file path
+	 * @return boolean TRUE if file should be included otherwise FALSE
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	protected function shouldFileBeProcessed($relativeFilePath) {
-		foreach ($this->includeFilePattern as $singleFilePattern) {
-			if (preg_match($singleFilePattern, $relativeFilePath)) {
+		foreach ($this->excludeFilePatterns as $excludeFilePattern) {
+			if (preg_match($excludeFilePattern, $relativeFilePath) > 0) {
+				return FALSE;
+			}
+		}
+		foreach ($this->includeFilePatterns as $includeFilePattern) {
+			if (preg_match($includeFilePattern, $relativeFilePath) > 0) {
 				return TRUE;
 			}
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Renames $targetFilename based on $this->renameFilenamePatterns
+	 * 
+	 * @param $targetFilename relative file path
+	 * @return string renamed filename
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	protected function renameTargetFilename($targetFilename) {
+		foreach ($this->renameFilenamePatterns as $renameFilenamePattern => $renameFilenameReplacement) {
+			$targetFilename = preg_replace($renameFilenamePattern, $renameFilenameReplacement, $targetFilename);
+		}
+		return $targetFilename;
 	}
 
 	/**
@@ -188,9 +297,9 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setTargetPath($targetPath) {
-		$targetPath =  \F3\FLOW3\Utility\Files::getUnixStylePath($targetPath);
+		$targetPath = \F3\FLOW3\Utility\Files::getUnixStylePath($targetPath);
 		if (!is_dir($targetPath)) {
-			throw new \F3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is no directory');
+			\F3\FLOW3\Utility\Files::createDirectoryRecursively($targetPath);
 		}
 		if (!is_writable($targetPath)) {
 			throw new \F3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not writable');

@@ -21,7 +21,7 @@ namespace F3\Backporter\CodeProcessor;
  * @version $Id$
  */
 /**
- * Testcase for DefaultClassCodeProcessorTest
+ * Testcase for TestClassCodeProcessorTest
  *
  * @package Backporter
  * @subpackage Tests
@@ -29,13 +29,13 @@ namespace F3\Backporter\CodeProcessor;
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
 
-class DefaultClassCodeProcessorTest extends \F3\Testing\BaseTestCase {
+class TestClassCodeProcessorTest extends \F3\Testing\BaseTestCase {
 
 	/**
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function simpleClassIsBackportedCorrectly() {
+	public function simpleTestClassIsBackportedCorrectly() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
 namespace F3\SomePackage\MySubpackage;
@@ -49,17 +49,17 @@ namespace F3\SomePackage\MySubpackage;
  * @subpackage MySubpackage
  */
 
-class SomeClass extends \F3\MyPackage\MySubpackage\SomeOtherClass implements \F3\MyPackage\SomeInterface {
+class SomeTest extends \F3\Testing\BaseTestCase {
 
 	/**
-	 * String to be replaced.
+	 * String to be replaced
 	 *
-	 * @param \ArrayObject $arguments some documentation
-	 * @param \F3\MyPackage\SomeInterface $foo some documentation
-	 * @return void
+	 * @test
+	 * @author John Doe <john@doe.com>
 	 */
-	public function someMethod(\ArrayObject $arguments, \F3\MyPackage\SomeInterface $foo) {
-		$bar = $objectFactory->create(\'F3\MyPackage\MySubpackage\ClassNameToBeReplaced\');
+	public function someTestMethod() {
+		$someMock = $this->getMock(\'Tx_MyPackage_MySubpackage_Foo\', array(\'someMethod\'));
+		$this->assertEquals($expectedResult, $actualResult);
 	}
 }
 ?>';
@@ -74,27 +74,28 @@ class SomeClass extends \F3\MyPackage\MySubpackage\SomeOtherClass implements \F3
  * @subpackage MySubpackage
  */
 
-class Tx_MyExtension_MySubpackage_SomeClass extends Tx_MyExtension_MySubpackage_SomeOtherClass implements Tx_MyExtension_SomeInterface {
+require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));
+class Tx_MyExtension_MySubpackage_SomeTest_testcase extends Tx_Extbase_Base_testcase {
 
 	/**
-	 * The replaced string.
+	 * The replaced string
 	 *
-	 * @param ArrayObject $arguments some documentation
-	 * @param Tx_MyExtension_SomeInterface $foo some documentation
-	 * @return void
+	 * @test
+	 * @author John Doe <john@doe.com>
 	 */
-	public function someMethod(ArrayObject $arguments, Tx_MyExtension_SomeInterface $foo) {
-		$bar = $objectFactory->create(\'Tx_MyExtension_MySubpackage_ReplacedClassName\');
+	public function test_someTestMethod() {
+		$someMock = $this->getMock(\'Tx_MyPackage_MySubpackage_Foo\', array(\'someMethod\'));
+		$this->assertEquals($expectedResult, $actualResult);
 	}
 }
 ?>';
-		$codeProcessor = new \F3\Backporter\CodeProcessor\DefaultClassCodeProcessor();
+		$codeProcessor = new \F3\Backporter\CodeProcessor\TestClassCodeProcessor();
 		$codeProcessor->setExtensionKey('MyExtension');
 		$codeProcessor->setClassCode($classCode);
 		$actualResult = $codeProcessor->processCode(
 			array(
 				'String to be replaced' => 'The replaced string',
-				'F3\MyPackage\MySubpackage\ClassNameToBeReplaced' => 'Tx_MyExtension_MySubpackage_ReplacedClassName'
+				'F3\Testing\BaseTestCase' => 'Tx_Extbase_Base_testcase'
 			)
 		);
 		$this->assertEquals($expectedResult, $actualResult);

@@ -31,6 +31,14 @@ namespace F3\Backporter\CodeProcessor;
  */
 abstract class AbstractCodeProcessor {
 
+	const PATTERN_NAMESPACE_DECLARATION = '/^namespace\s+(?P<namespace>.*);\n/m';
+	const PATTERN_ENCODING_DECLARATION = '/^declare\(ENCODING = \'(?P<encoding>[^\']+)\'\);\n/m';
+	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
+	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():])/m';
+	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>F3(?:\\\\\w+)+)/x';
+	const PATTERN_CLASS_SIGNATURE = '/(?<=\n|^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)/';
+	const PATTERN_CLASS_NAME = '/F3\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
+
 	/**
 	 * Unmodified FLOW3 class code.
 	 *
@@ -118,8 +126,8 @@ abstract class AbstractCodeProcessor {
 	 */
 	protected function findClassNamespace() {
 		$matches = array();
-		preg_match('/^namespace\s+(.*);/m', $this->originalClassCode, $matches);
-		return $matches[1];
+		preg_match(self::PATTERN_NAMESPACE_DECLARATION, $this->originalClassCode, $matches);
+		return $matches['namespace'];
 	}
 
 	/**
@@ -155,8 +163,8 @@ abstract class AbstractCodeProcessor {
 	 * @return string the modified string
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function removeUTF8Declaration() {
-		$this->processedClassCode = preg_replace('/^declare\(ENCODING = \'utf-8\'\);\n/m', '', $this->processedClassCode);
+	public function removeEncodingDeclaration() {
+		$this->processedClassCode = preg_replace(self::PATTERN_ENCODING_DECLARATION, '', $this->processedClassCode);
 	}
 
 	/**
@@ -166,7 +174,7 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeNamespaceDeclarations() {
-		$this->processedClassCode = preg_replace('/^namespace\s+.*;\n/m', '', $this->processedClassCode);
+		$this->processedClassCode = preg_replace(self::PATTERN_NAMESPACE_DECLARATION, '', $this->processedClassCode);
 	}
 
 	/**
@@ -176,7 +184,9 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeGlobalNamespaceSeparators() {
-		$this->processedClassCode = preg_replace('/([( ])\\\\([a-zA-Z0-9]{3,}[ (])/', '$1$2', $this->processedClassCode);
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_GLOBAL_OBJECT_NAMES, function($matches) {
+			return $matches['objectName'];
+		}, $this->processedClassCode);
 	}
 
 	/**
@@ -186,10 +196,9 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function transformClassName() {
-		$regex = '/((?:abstract )?(?:class|interface)\s)([a-zA-Z0-9]+)/';
 		$that = $this;
-		$this->processedClassCode = preg_replace_callback($regex, function($result) use (&$that) {
-			return $result[1] . $that->convertClassName($that->getClassNamespace() . '\\' . $result[2]);
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use (&$that) {
+			return $matches['modifiers'] . $that->convertClassName($that->getClassNamespace() . '\\' . $matches['className']);
 		}, $this->processedClassCode);
 	}
 
@@ -200,13 +209,9 @@ abstract class AbstractCodeProcessor {
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function transformObjectNames() {
-		$regex = '/
-			\\\\?
-			(F3(?:\\\\\w+)+)
-		/x';
 		$that = $this;
-		$this->processedClassCode = preg_replace_callback($regex, function($result) use (&$that) {
-			return $that->convertClassName($result[1]);
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_OBJECT_NAMES, function($matches) use (&$that) {
+			return $that->convertClassName($matches['objectName']);
 		}, $this->processedClassCode);
 	}
 
@@ -218,17 +223,11 @@ abstract class AbstractCodeProcessor {
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function convertClassName($oldClassName) {
-		$regex = '/
-			F3\\\\
-			(?P<PackageKey>[A-Za-z0-9]+)
-			(?P<ObjectName>(?:\\\\\w+)+)
-		/x';
-
-		preg_match($regex, $oldClassName, $matches);
+		preg_match(self::PATTERN_CLASS_NAME, $oldClassName, $matches);
 
 		$newClassName = 'Tx_';
 		$newClassName .= $this->upperCasedExtensionKey;
-		$newClassName .= str_replace('\\', '_', $matches['ObjectName']);
+		$newClassName .= str_replace('\\', '_', $matches['objectName']);
 
 		return $newClassName;
 	}
@@ -257,6 +256,82 @@ abstract class AbstractCodeProcessor {
 	 */
 	public function replaceString($searchString, $replaceString) {
 		$this->processedClassCode = str_replace($searchString, $replaceString, $this->processedClassCode);
+	}
+
+	/**
+	 * Prefixes all methods with a given prefix
+	 *
+	 * @param string $prefix string to be prepended to method names
+	 * @param array $excludeModifiers methods with the specified modifiers (abstract private/public/protected) will be excluded
+	 * @param array $excludeMethodMames methods to be excluded
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function prefixMethodNames($prefix, array $excludeModifiers = array(), array $excludeMethodNames = array()) {
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_METHOD_SIGNATURES, function($matches) use ($prefix, $excludeModifiers, $excludeMethodNames) {
+			if (in_array($matches['modifiers'], $excludeModifiers) || in_array($matches['methodName'], $excludeMethodNames)) {
+				return $matches['modifiers'] . $matches['methodName'];
+			}
+			return $matches['modifiers'] . $prefix . $matches['methodName'];
+		}, $this->processedClassCode);
+	}
+
+	/**
+	 * Suffixes all methods with a given prefix
+	 *
+	 * @param string $suffix string to be appended to method names
+	 * @param array $excludeModifiers methods with the specified modifiers (abstract private/public/protected) will be excluded
+	 * @param array $excludeMethodMames methods to be excluded
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function suffixMethodNames($suffix, array $excludeModifiers = array(), array $excludeMethodNames = array()) {
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_METHOD_SIGNATURES, function($matches) use ($suffix, $excludeModifiers, $excludeMethodNames) {
+			if (in_array($matches['modifiers'], $excludeModifiers) || in_array($matches['methodName'], $excludeMethodNames)) {
+				return $matches['modifiers'] . $matches['methodName'];
+			}
+			return $matches['modifiers'] . $matches['methodName'] . $suffix;
+		}, $this->processedClassCode);
+	}
+
+	/**
+	 * Prefixes class name with a given prefix
+	 *
+	 * @param string $prefix string to be prepended to class name
+	 * @param array $excludeMethods methods to be excluded (method names including modifiers)
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function prefixClassName($prefix) {
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($prefix) {
+			return $matches['modifiers'] . $prefix . $matches['className'];
+		}, $this->processedClassCode);
+	}
+
+	/**
+	 * Suffixes class name with a given prefix
+	 *
+	 * @param string $suffix string to be appended to class name
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function suffixClassName($suffix) {
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($suffix) {
+			return $matches['modifiers'] . $matches['className'] . $suffix;
+		}, $this->processedClassCode);
+	}
+
+	/**
+	 * Inserts the given string above the class declaration
+	 *
+	 * @param string $classHeader line to be inserted above class declaration, e.g. an include/require statement
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function addClassHeader($classHeader) {
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($classHeader) {
+			return $classHeader . chr(10) . $matches['modifiers'] . $matches['className'];
+		}, $this->processedClassCode);
 	}
 }
 ?>

@@ -28,7 +28,7 @@ namespace F3\Backporter\Controller;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class DefaultController extends \F3\FLOW3\MVC\Controller\ActionController {
+class StandardController extends \F3\FLOW3\MVC\Controller\ActionController {
 
 	/**
 	 * Defines the supported request types of this controller
