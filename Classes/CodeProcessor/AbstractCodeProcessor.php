@@ -268,12 +268,17 @@ abstract class AbstractCodeProcessor {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function prefixMethodNames($prefix, array $excludeModifiers = array(), array $excludeMethodNames = array()) {
-		$this->processedClassCode = preg_replace_callback(self::PATTERN_METHOD_SIGNATURES, function($matches) use ($prefix, $excludeModifiers, $excludeMethodNames) {
+		$replacementsToBeDone = array();
+
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_METHOD_SIGNATURES, function($matches) use ($prefix, $excludeModifiers, $excludeMethodNames, &$replacementsToBeDone) {
 			if (in_array($matches['modifiers'], $excludeModifiers) || in_array($matches['methodName'], $excludeMethodNames)) {
 				return $matches['modifiers'] . $matches['methodName'];
 			}
+			// prepend all local calls as well ($this->yourMethodCall)
+			$replacementsToBeDone['$this->' . $matches['methodName'] . '('] = '$this->' . $prefix . $matches['methodName'] . '(';
 			return $matches['modifiers'] . $prefix . $matches['methodName'];
 		}, $this->processedClassCode);
+		$this->replaceStrings($replacementsToBeDone);
 	}
 
 	/**
