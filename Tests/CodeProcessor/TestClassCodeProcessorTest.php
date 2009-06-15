@@ -83,7 +83,7 @@ class Tx_MyExtension_MySubpackage_SomeTest_testcase extends Tx_Extbase_Base_test
 	 * @test
 	 * @author John Doe <john@doe.com>
 	 */
-	public function test_someTestMethod() {
+	public function someTestMethod() {
 		$someMock = $this->getMock(\'Tx_MyPackage_MySubpackage_Foo\', array(\'someMethod\'));
 		$this->assertEquals($expectedResult, $actualResult);
 	}
