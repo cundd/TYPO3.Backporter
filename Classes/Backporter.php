@@ -106,6 +106,13 @@ class Backporter {
 	protected $renameFilenamePatterns = array();
 
 	/**
+	 * An array of file specific replace pairs
+	 *
+	 * @var array
+	 */
+	protected $fileSpecificReplacePairs = array();
+
+	/**
 	 * Injects the object manager
 	 *
 	 * @param \F3\FLOW3\Object\ManagerInterface $objectManager A reference to the object manager
@@ -197,6 +204,17 @@ class Backporter {
 	}
 
 	/**
+	 * Sets file specific replace pairs
+	 *
+	 * @param array $fileSpecificReplacePairs
+	 * @return void
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 */
+	public function setFileSpecificReplacePairs(array $fileSpecificReplacePairs) {
+		$this->fileSpecificReplacePairs = $fileSpecificReplacePairs;
+	}
+
+	/**
 	 * Loads all files in $sourcePath, transforms and stores them in $targetPath
 	 *
 	 * @param string $sourcePath Absolute path of the source file directory
@@ -225,7 +243,12 @@ class Backporter {
 			$targetFilename = $this->renameTargetFilename($targetFilename);
 			\F3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
-			file_put_contents($targetFilename, $codeProcessor->processCode($this->replacePairs));
+
+			$replacePairs = $this->replacePairs;
+			if (isset($this->fileSpecificReplacePairs[$relativeFilePath]) && is_array($this->fileSpecificReplacePairs[$relativeFilePath])) {
+				$replacePairs = array_merge($replacePairs, $this->fileSpecificReplacePairs[$relativeFilePath]);
+			}
+			file_put_contents($targetFilename, $codeProcessor->processCode($replacePairs));
 		}
 	}
 
