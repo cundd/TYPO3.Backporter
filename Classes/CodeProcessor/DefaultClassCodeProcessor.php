@@ -33,7 +33,6 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 	/**
 	 * Processes the FLOW3 code by calling the respective helper methods.
 	 *
-	 * @param string $inputString
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
 	 * @return string the processed code
 	 * @author Bastian Waidelich <bastian@typo3.org>

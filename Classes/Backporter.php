@@ -137,7 +137,7 @@ class Backporter {
 	/**
 	 * Setter for the code processor class name
 	 *
-	 * @param string $extensionKey
+	 * @param string $codeProcessorClassName
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
@@ -184,7 +184,7 @@ class Backporter {
 	 * Array key will be replaced by array value.
 	 * eg: array('/(.*).php/' => '$1_suffix.php')
 	 *
-	 * @param array $renameFilePatterns an array of PCREs which will be used to rename target filenames.
+	 * @param array $renameFilenamePatterns an array of PCREs which will be used to rename target filenames.
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
@@ -258,7 +258,7 @@ class Backporter {
 	 * 1. relative file path does not match with one of the RegEx given in $this->excludeFilePatterns and
 	 * 2. relative file path does match with one of the RegEx given in $this->includeFilePatterns
 	 *
-	 * @param $relativeFilePath relative file path
+	 * @param string $relativeFilePath relative file path
 	 * @return boolean TRUE if file should be included otherwise FALSE
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 * @author Bastian Waidelich <bastian@typo3.org>
@@ -280,7 +280,7 @@ class Backporter {
 	/**
 	 * Renames $targetFilename based on $this->renameFilenamePatterns
 	 *
-	 * @param $targetFilename relative file path
+	 * @param string $targetFilename relative file path
 	 * @return string renamed filename
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */

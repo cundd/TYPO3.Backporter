@@ -262,7 +262,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $prefix string to be prepended to method names
 	 * @param array $excludeModifiers methods with the specified modifiers (abstract private/public/protected) will be excluded
-	 * @param array $excludeMethodMames methods to be excluded
+	 * @param array $excludeMethodNames methods to be excluded
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
@@ -285,7 +285,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $suffix string to be appended to method names
 	 * @param array $excludeModifiers methods with the specified modifiers (abstract private/public/protected) will be excluded
-	 * @param array $excludeMethodMames methods to be excluded
+	 * @param array $excludeMethodNames methods to be excluded
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
