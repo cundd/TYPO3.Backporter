@@ -40,7 +40,7 @@ class TestClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCodePr
 	public function processCode(array $replacePairs = array()) {
 		$this->replaceStrings($replacePairs);
 		$this->suffixClassName('_testcase');
-		$this->addClassHeader('require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));');
+		//$this->addClassHeader('require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));');
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
