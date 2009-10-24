@@ -42,6 +42,7 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
+		$this->addPackageAndSubpackageAnnotations();
 		$this->transformClassName();
 		$this->transformObjectNames();
 		return $this->processedClassCode;

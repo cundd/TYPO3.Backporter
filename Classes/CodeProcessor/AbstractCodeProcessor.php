@@ -337,5 +337,24 @@ abstract class AbstractCodeProcessor {
 			return $classHeader . chr(10) . $matches['modifiers'] . $matches['className'];
 		}, $this->processedClassCode);
 	}
+	
+	/**
+	 * Add package and subpackage annotations after @version annotation in file-level docblock.
+	 * 
+	 * @return void
+	 * @author Sebastian Kurfürst <sebastian@typo3.org>
+	 */
+	public function addPackageAndSubpackageAnnotations() {
+		$that = $this;
+		$this->processedClassCode = preg_replace_callback('/ @version(.*)/', function($matches) use ($that) {
+			$classNamespaceArray = explode('\\', $that->getClassNamespace());
+			array_shift($classNamespaceArray);
+			$package = array_shift($classNamespaceArray);
+			$subpackage = implode('\\', $classNamespaceArray);
+			return $matches[0]
+			. chr(10) . ' * @package ' . $package
+			. chr(10) . ' * @subpackage ' . $subpackage;
+		}, $this->processedClassCode);
+	}
 }
 ?>
