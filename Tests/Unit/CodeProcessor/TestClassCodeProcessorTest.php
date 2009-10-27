@@ -69,7 +69,6 @@ class SomeTest extends \F3\Testing\BaseTestCase {
  /**
  */
 
-require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));
 class Tx_MyExtension_MySubpackage_SomeTest_testcase extends Tx_Extbase_Base_testcase {
 
 	/**
