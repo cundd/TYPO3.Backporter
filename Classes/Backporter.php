@@ -73,7 +73,8 @@ class Backporter {
 	protected $replacePairs = array();
 
 	/**
-	 * @var \F3\FLOW3\Object\ManagerInterface A reference to the Object Manager
+	 * @var \F3\FLOW3\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
@@ -111,17 +112,6 @@ class Backporter {
 	 * @var array
 	 */
 	protected $fileSpecificReplacePairs = array();
-
-	/**
-	 * Injects the object manager
-	 *
-	 * @param \F3\FLOW3\Object\ManagerInterface $objectManager A reference to the object manager
-	 * @return void
-	 * @author Bastian Waidelich <bastian@typo3.org>
-	 */
-	public function injectObjectManager(\F3\FLOW3\Object\ManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
 
 	/**
 	 * Setter for the target extension key
