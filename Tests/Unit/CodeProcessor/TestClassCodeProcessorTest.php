@@ -69,7 +69,7 @@ class SomeTest extends \F3\Testing\BaseTestCase {
  /**
  */
 
-class Tx_MyExtension_MySubpackage_SomeTest_testcase extends Tx_Extbase_Base_testcase {
+class Tx_MyExtension_MySubpackage_SomeTest extends Tx_Extbase_Base_testcase {
 
 	/**
 	 * The replaced string
