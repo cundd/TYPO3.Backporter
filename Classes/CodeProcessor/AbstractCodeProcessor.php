@@ -33,7 +33,7 @@ abstract class AbstractCodeProcessor {
 	const PATTERN_NAMESPACE_DECLARATION = '/^namespace\s+(?P<namespace>.*);\n/m';
 	const PATTERN_ENCODING_DECLARATION = '/^declare\(ENCODING = \'(?P<encoding>[^\']+)\'\);\n/m';
 	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
-	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():])/m';
+	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():\n])/m';
 	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>F3(?:\\\\\w+)+)/x';
 	const PATTERN_CLASS_SIGNATURE = '/(?<=\n|^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)/';
 	const PATTERN_CLASS_NAME = '/F3\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
