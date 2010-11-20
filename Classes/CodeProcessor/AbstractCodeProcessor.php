@@ -32,15 +32,21 @@ abstract class AbstractCodeProcessor {
 
 	const PATTERN_NAMESPACE_DECLARATION = '/^namespace\s+(?P<namespace>.*);\n/m';
 	const PATTERN_ENCODING_DECLARATION = '/^declare\(ENCODING = \'(?P<encoding>[^\']+)\'\);\n/m';
+	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@scope\s+(?P<scope>[a-zA-Z]+).*\n/m';
 	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
 	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():\n])/m';
 	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>F3(?:\\\\\w+)+)/x';
-	const PATTERN_CLASS_SIGNATURE = '/(?<=\n|^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)/';
+	const PATTERN_CLASS_SIGNATURE = '/(?<=^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)(?<parents>(\sextends\s(?<extends>[a-zA-Z0-9_\\\\]+))?(\simplements\s(?<implements>[a-zA-Z0-9_, \\\\]+))?)(?=\s*{$)/m';
 	const PATTERN_CLASS_NAME = '/F3\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
+
+	const SCOPE_PROTOTYPE = 'prototype';
+	const SCOPE_SINGLETON = 'singleton';
+	const SCOPE_SESSION = 'session';
 
 	/**
 	 * Unmodified FLOW3 class code.
 	 *
+	 * @var string
 	 * @var string
 	 */
 	protected $originalClassCode = '';
@@ -58,6 +64,13 @@ abstract class AbstractCodeProcessor {
 	 * @var string
 	 */
 	protected $classNamespace = NULL;
+
+	/**
+	 * Scope of the class (One of the SCOPE_* constants)
+	 *
+	 * @var string
+	 */
+	protected $scope = NULL;
 
 	/**
 	 * Extension-key of the target Extension (e.g. my_extension)
@@ -130,6 +143,70 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
+	 * Getter for the classes scope
+	 *
+	 * @return string $scope (one of SCOPE_* constants)
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function getClassScope() {
+		$matches = array();
+		preg_match(self::PATTERN_SCOPE_ANNOTATION, $this->originalClassCode, $matches);
+		if (!isset($matches['scope'])) {
+			return self::SCOPE_SINGLETON;
+		}
+		switch ($matches['scope']) {
+			case self::SCOPE_PROTOTYPE:
+				return self::SCOPE_PROTOTYPE;
+			case self::SCOPE_SESSION:
+				return self::SCOPE_SESSION;
+			case self::SCOPE_SINGLETON:
+				return self::SCOPE_SINGLETON;
+			default:
+				throw new \F3\Backporter\Exception\InvalidScopeException('Invalid scope "' . $matches['scope'] . '"');
+		}
+	}
+
+	/**
+	 * Removes @scope annotation and adds t3lib_Singleton to the list of implemented interfaces
+	 * If the class is of scope singleton
+	 *
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function processScopeAnnotation() {
+		$scope = $this->getClassScope();
+		$this->removeScopeAnnotation();
+		if ($scope !== self::SCOPE_SINGLETON) {
+			return;
+		}
+		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) {
+			$classSignature = $matches['modifiers'] . $matches['className'];
+			if (!empty($matches['extends'])) {
+				$classSignature .= ' extends ' . $matches['extends'];
+			}
+			if (trim($matches['modifiers']) === 'interface') {
+				return $classSignature;
+			}
+			if (!empty($matches['implements'])) {
+				$classSignature .= ' implements ' . trim($matches['implements']) . ', t3lib_Singleton ';
+			} else {
+				$classSignature .= ' implements t3lib_Singleton';
+			}
+			return $classSignature;
+		}, $this->processedClassCode);
+	}
+
+	/**
+	 * Removes @scope prototype|singleton|session annotations
+	 *
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function removeScopeAnnotation() {
+		$this->processedClassCode = preg_replace(self::PATTERN_SCOPE_ANNOTATION, '', $this->processedClassCode);
+	}
+
+	/**
 	 * Setter for the target extension key
 	 *
 	 * @param string $extensionKey
@@ -197,7 +274,7 @@ abstract class AbstractCodeProcessor {
 	public function transformClassName() {
 		$that = $this;
 		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use (&$that) {
-			return $matches['modifiers'] . $that->convertClassName($that->getClassNamespace() . '\\' . $matches['className']);
+			return $matches['modifiers'] . $that->convertClassName($that->getClassNamespace() . '\\' . $matches['className']) . $matches['parents'];
 		}, $this->processedClassCode);
 	}
 
@@ -308,7 +385,7 @@ abstract class AbstractCodeProcessor {
 	 */
 	public function prefixClassName($prefix) {
 		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($prefix) {
-			return $matches['modifiers'] . $prefix . $matches['className'];
+			return $matches['modifiers'] . $prefix . $matches['className'] . $matches['parents'];
 		}, $this->processedClassCode);
 	}
 
@@ -321,7 +398,7 @@ abstract class AbstractCodeProcessor {
 	 */
 	public function suffixClassName($suffix) {
 		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($suffix) {
-			return $matches['modifiers'] . $matches['className'] . $suffix;
+			return $matches['modifiers'] . $matches['className'] . $suffix . $matches['parents'];
 		}, $this->processedClassCode);
 	}
 
@@ -334,13 +411,13 @@ abstract class AbstractCodeProcessor {
 	 */
 	public function addClassHeader($classHeader) {
 		$this->processedClassCode = preg_replace_callback(self::PATTERN_CLASS_SIGNATURE, function($matches) use ($classHeader) {
-			return $classHeader . chr(10) . $matches['modifiers'] . $matches['className'];
+			return $classHeader . chr(10) . $matches['modifiers'] . $matches['className'] . $matches['parents'];
 		}, $this->processedClassCode);
 	}
-	
+
 	/**
 	 * Add package and subpackage annotations after @version annotation in file-level docblock.
-	 * 
+	 *
 	 * @return void
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */

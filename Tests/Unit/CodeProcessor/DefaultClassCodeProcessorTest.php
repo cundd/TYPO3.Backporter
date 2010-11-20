@@ -69,7 +69,7 @@ class SomeClass extends \F3\MyPackage\MySubpackage\SomeOtherClass implements \F3
  /**
  */
 
-class Tx_MyExtension_MySubpackage_SomeClass extends Tx_MyExtension_MySubpackage_SomeOtherClass implements Tx_MyExtension_SomeInterface {
+class Tx_MyExtension_MySubpackage_SomeClass extends Tx_MyExtension_MySubpackage_SomeOtherClass implements Tx_MyExtension_SomeInterface, t3lib_Singleton {
 
 	/**
 	 * The replaced string.

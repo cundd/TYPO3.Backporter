@@ -44,6 +44,7 @@ class DefaultClassCodeProcessor extends \F3\Backporter\CodeProcessor\AbstractCod
 		$this->removeGlobalNamespaceSeparators();
 		$this->addPackageAndSubpackageAnnotations();
 		$this->transformClassName();
+		$this->processScopeAnnotation();
 		$this->transformObjectNames();
 		return $this->processedClassCode;
 	}

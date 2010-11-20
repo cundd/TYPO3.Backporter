@@ -127,11 +127,204 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
+	public function classScopePrototypeCanBeDetermined() {
+		$classCode = '
+/**
+ * Some comments
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ * @scope prototype
+ */
+ class SomeClassname {';
+		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_PROTOTYPE;
+		$this->codeProcessor->setClassCode($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function classScopeSingletonCanBeDetermined() {
+		$classCode = '
+/**
+ * Some comments
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ * @scope singleton
+ */
+ class SomeClassname {';
+		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
+		$this->codeProcessor->setClassCode($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function classScopeSessionCanBeDetermined() {
+		$classCode = '
+/**
+ * @scope session foo
+ * @someOtherAnnotation
+ */
+ class SomeClassname {';
+		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SESSION;
+		$this->codeProcessor->setClassCode($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function classScopeDefaultsToSingleton() {
+		$classCode = '
+/**
+ * Some comments
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ */
+ class SomeClassname {';
+		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
+		$this->codeProcessor->setClassCode($classCode);
+		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
+	}
+
+	/**
+	 * @test
+	 * @expectedException \F3\Backporter\Exception\InvalidScopeException
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function invalidScopeAnnotationThrowsException() {
+		$classCode = '
+/**
+ * Some comments
+ *
+ * @scope someNonExistingScope
+ */
+ class SomeClassname {';
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->getClassScope();
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function scopeAnnotationCanBeRemoved() {
+		$classCode = '
+/**
+ * some comment before
+ * @scope prototype
+ * some comment after
+ */
+ class SomeClassname {';
+		$expectedResult = '
+/**
+ * some comment before
+ * some comment after
+ */
+ class SomeClassname {';
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->removeScopeAnnotation();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
+	}
+
+	/**
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function classSignatures() {
+		return array(
+			array('
+class SomeClassname {
+', '
+class SomeClassname implements t3lib_Singleton {
+'),array('
+class SomeClassname extends Some\Other\Class {
+', '
+class SomeClassname extends Some\Other\Class implements t3lib_Singleton {
+'),array('
+/**
+ * Template parser building up an object syntax tree
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ */
+class TemplateParser {
+','
+/**
+ * Template parser building up an object syntax tree
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ */
+class TemplateParser implements t3lib_Singleton {
+'),array('
+/**
+ * @scope singleton
+ */
+class SomeClassname implements Some\Interface {
+', '
+/**
+ */
+class SomeClassname implements Some\Interface, t3lib_Singleton {
+'),array(
+'
+/**
+ * @scope prototype
+ */
+class SomeClassname implements Some\Interface {
+', '
+/**
+ */
+class SomeClassname implements Some\Interface {
+'),array(
+'
+/**
+ * @scope session
+ */
+class SomeClassname extends Some\Other\Class implements Some\Interface {
+', '
+/**
+ */
+class SomeClassname extends Some\Other\Class implements Some\Interface {
+'),array(
+'
+interface SomeInterface {
+', '
+interface SomeInterface {
+')
+,array(
+'
+interface SomeInterface extends SomeOtherInterface {
+', '
+interface SomeInterface extends SomeOtherInterface {
+')
+		);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider classSignatures
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function processScopeAnnotationCorrectlyRemovesAnnotationAndAddsT3libSingletonInterfaceToSingletonClasses($classCode, $expectedResult) {
+		$this->codeProcessor->setClassCode($classCode);
+		$this->codeProcessor->processScopeAnnotation();
+		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
+	}
+
+	/**
+	 * @test
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
 	public function classNameCanBeTransformed() {
 		$classCode = '// some class name within comments
-abstract class Some123ClassName implements \F3\Package\Subpackage\SomeInterface';
+abstract class Some123ClassName implements \F3\Package\Subpackage\SomeInterface {
+';
 		$expectedResult = '// some class name within comments
-abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Package\Subpackage\SomeInterface';
+abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Package\Subpackage\SomeInterface {
+';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('extension_key');
 		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
@@ -144,8 +337,12 @@ abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Packag
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function interfaceNameCanBeTransformed() {
-		$classCode = 'interface Some123Interface extends \F3\Package\Subpackage\SomeInterface';
-		$expectedResult = 'interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpackage\SomeInterface';
+		$classCode = '
+interface Some123Interface extends \F3\Package\Subpackage\SomeInterface {
+';
+		$expectedResult = '
+interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpackage\SomeInterface {
+';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('extension_key');
 		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
