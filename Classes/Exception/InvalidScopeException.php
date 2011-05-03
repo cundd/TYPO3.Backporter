@@ -23,11 +23,11 @@ namespace F3\Backporter\Exception;
  *                                                                        */
 
 /**
- * An "Invalid Path" exception
+ * An "Invalid Scope" exception
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
-class InvalidPathException extends \F3\FLOW3\Exception {
+class InvalidScopeException extends \F3\FLOW3\Exception {
 
 }
 ?>

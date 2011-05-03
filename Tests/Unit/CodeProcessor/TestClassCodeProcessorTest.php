@@ -28,7 +28,7 @@ namespace F3\Backporter\CodeProcessor;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class TestClassCodeProcessorTest extends \F3\Testing\BaseTestCase {
+class TestClassCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
 
 	/**
 	 * @test

@@ -28,7 +28,7 @@ namespace F3\Backporter;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class BackporterTest extends \F3\Testing\BaseTestCase {
+class BackporterTest extends \F3\FLOW3\Tests\UnitTestCase {
 
 	protected $sourceFixturePath;
 	protected $targetFixturePath;
