@@ -220,7 +220,7 @@ class Backporter {
 		}
 		$this->findSourceFilenames();
 
-		$codeProcessor = $this->objectManager->getObject($this->codeProcessorClassName);
+		$codeProcessor = $this->objectManager->get($this->codeProcessorClassName);
 		$codeProcessor->setExtensionKey($this->extensionKey);
 		foreach($this->sourceFilenames as $sourceFilename) {
 			$classCode = \F3\FLOW3\Utility\Files::getFileContents($sourceFilename);

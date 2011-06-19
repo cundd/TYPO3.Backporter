@@ -152,7 +152,7 @@ abstract class AbstractCodeProcessor {
 		$matches = array();
 		preg_match(self::PATTERN_SCOPE_ANNOTATION, $this->originalClassCode, $matches);
 		if (!isset($matches['scope'])) {
-			return self::SCOPE_SINGLETON;
+			return self::SCOPE_PROTOTYPE;
 		}
 		switch ($matches['scope']) {
 			case self::SCOPE_PROTOTYPE:
