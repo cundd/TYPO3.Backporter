@@ -1,9 +1,9 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\Controller;
+namespace TYPO3\Backporter\Controller;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the FLOW3 package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -25,17 +25,16 @@ namespace F3\Backporter\Controller;
 /**
  * Packporter Default Controller
  *
- * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class StandardController extends \F3\FLOW3\MVC\Controller\ActionController {
+class StandardController extends \TYPO3\FLOW3\MVC\Controller\ActionController {
 
 	/**
 	 * Defines the supported request types of this controller
 	 *
 	 * @var array
 	 */
-	protected $supportedRequestTypes = array('F3\FLOW3\MVC\CLI\Request');
+	protected $supportedRequestTypes = array('TYPO3\FLOW3\MVC\CLI\Request');
 
 	/*
 	 * @param string $sourcePath
@@ -43,7 +42,7 @@ class StandardController extends \F3\FLOW3\MVC\Controller\ActionController {
 	 * @param string $extensionKey
 	 */
 	public function indexAction($sourcePath, $targetPath, $extensionKey) {
-		$backporter = $this->objectManager->getObject('F3\Backporter\Backporter');
+		$backporter = $this->objectManager->getObject('TYPO3\Backporter\Backporter');
 		$backporter->setExtensionKey($extensionKey);
 		$backporter->processFiles($sourcePath, $targetPath);
 		return 'files backported.';

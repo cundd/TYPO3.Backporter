@@ -1,6 +1,6 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\CodeProcessor;
+namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
  * This script belongs to the FLOW3 package "BackPorter".                 *
@@ -28,12 +28,12 @@ namespace F3\Backporter\CodeProcessor;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class AbstractCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
+class AbstractCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
 	protected $codeProcessor;
 
 	public function setUp() {
-		$this->codeProcessor = $this->getMock($this->buildAccessibleProxy('F3\Backporter\CodeProcessor\AbstractCodeProcessor'), array('processCode'), array(), '', FALSE);
+		$this->codeProcessor = $this->getMock($this->buildAccessibleProxy('TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor'), array('processCode'), array(), '', FALSE);
 	}
 
 	/**
@@ -53,10 +53,10 @@ class AbstractCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
 	public function namespaceCanBeExtractedFromClassCode() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
-namespace F3\FLOW3\Cache\Frontend;
+namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
-		$expectedResult = 'F3\FLOW3\Cache\Frontend';
+		$expectedResult = 'TYPO3\FLOW3\Cache\Frontend';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassNamespace());
 	}
@@ -68,11 +68,11 @@ foobar';
 	public function EncodingDeclarationCanBeRemoved() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
-namespace F3\FLOW3\Cache\Frontend;
+namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
 		$expectedResult = '<?php
-namespace F3\FLOW3\Cache\Frontend;
+namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
 		$this->codeProcessor->setClassCode($classCode);
@@ -87,7 +87,7 @@ foobar';
 	public function namespaceDeclarationsCanBeRemoved() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
-namespace F3\FLOW3\Cache\Frontend;
+namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
 		$expectedResult = '<?php
@@ -105,16 +105,16 @@ foobar';
 	 */
 	public function globalNamespaceSeparatorsCanBeRemoved() {
 		$classCode = 'class FooBar extends \ArrayObject {
-public function someMethod(\ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
+public function someMethod(\ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
 	try {
-		$someOtherFlow3Object = new \F3\FLOW3\Subpackage\Bar();
+		$someOtherFlow3Object = new \TYPO3\FLOW3\Subpackage\Bar();
 	} catch (\Exception $exception) {
 	}
 }';
 		$expectedResult = 'class FooBar extends ArrayObject {
-public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
+public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooInterface $someFlow3Object) {
 	try {
-		$someOtherFlow3Object = new \F3\FLOW3\Subpackage\Bar();
+		$someOtherFlow3Object = new \TYPO3\FLOW3\Subpackage\Bar();
 	} catch (Exception $exception) {
 	}
 }';
@@ -136,7 +136,7 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
  * @scope prototype
  */
  class SomeClassname {';
-		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_PROTOTYPE;
+		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_PROTOTYPE;
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
 	}
@@ -154,7 +154,7 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
  * @scope singleton
  */
  class SomeClassname {';
-		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
+		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
 	}
@@ -170,7 +170,7 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
  * @someOtherAnnotation
  */
  class SomeClassname {';
-		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SESSION;
+		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SESSION;
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
 	}
@@ -187,14 +187,14 @@ public function someMethod(ArrayObject $arguments, \F3\FLOW3\Subpackage\FooInter
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
  class SomeClassname {';
-		$expectedResult = \F3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
+		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
 	}
 
 	/**
 	 * @test
-	 * @expectedException \F3\Backporter\Exception\InvalidScopeException
+	 * @expectedException \TYPO3\Backporter\Exception\InvalidScopeException
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function invalidScopeAnnotationThrowsException() {
@@ -320,14 +320,14 @@ interface SomeInterface extends SomeOtherInterface {
 	 */
 	public function classNameCanBeTransformed() {
 		$classCode = '// some class name within comments
-abstract class Some123ClassName implements \F3\Package\Subpackage\SomeInterface {
+abstract class Some123ClassName implements \TYPO3\Package\Subpackage\SomeInterface {
 ';
 		$expectedResult = '// some class name within comments
-abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Package\Subpackage\SomeInterface {
+abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \TYPO3\Package\Subpackage\SomeInterface {
 ';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('extension_key');
-		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
+		$this->codeProcessor->setClassNamespace('TYPO3\Package\Subpackage');
 		$this->codeProcessor->transformClassName();
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
@@ -338,14 +338,14 @@ abstract class Tx_ExtensionKey_Subpackage_Some123ClassName implements \F3\Packag
 	 */
 	public function interfaceNameCanBeTransformed() {
 		$classCode = '
-interface Some123Interface extends \F3\Package\Subpackage\SomeInterface {
+interface Some123Interface extends \TYPO3\Package\Subpackage\SomeInterface {
 ';
 		$expectedResult = '
-interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpackage\SomeInterface {
+interface Tx_ExtensionKey_Subpackage_Some123Interface extends \TYPO3\Package\Subpackage\SomeInterface {
 ';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('extension_key');
-		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
+		$this->codeProcessor->setClassNamespace('TYPO3\Package\Subpackage');
 		$this->codeProcessor->transformClassName();
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
@@ -355,11 +355,11 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	 * @author Sebastian Kurfürst <sebastian@typo3.org>
 	 */
 	public function objectNamesAreConverted() {
-		$classCode = 'class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$classCode = 'class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		try {
-			$someOtherFlow3Object = new \F3\Fluid\Subpackage\Bar();
-			$someOtherFlow3Object = objectFactory->create(\'F3\FLOW3\Subpackage\Bar\');
+			$someOtherFlow3Object = new \TYPO3\Fluid\Subpackage\Bar();
+			$someOtherFlow3Object = objectFactory->create(\'TYPO3\FLOW3\Subpackage\Bar\');
 		} catch (\Exception $exception) {
 		}
 	}';
@@ -373,7 +373,7 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	}';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->setExtensionKey('fluid');
-		$this->codeProcessor->setClassNamespace('F3\Package\Subpackage');
+		$this->codeProcessor->setClassNamespace('TYPO3\Package\Subpackage');
 		$this->codeProcessor->transformObjectNames();
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
@@ -407,12 +407,12 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function methodNamesCanBePrefixed() {
-		$classCode = 'class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$classCode = 'class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
-		$expectedResult = 'class FooBar extends \F3\Fluid\TestingBla {
-	public function somePrefix_someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$expectedResult = 'class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function somePrefix_someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
 		$this->codeProcessor->setClassCode($classCode);
@@ -441,12 +441,12 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function methodNamesCanBeSuffixed() {
-		$classCode = 'class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$classCode = 'class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
-		$expectedResult = 'class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod_someSuffix($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$expectedResult = 'class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod_someSuffix($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
 		$this->codeProcessor->setClassCode($classCode);
@@ -475,12 +475,12 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function classNameCanBePrefixed() {
-		$classCode = 'abstract class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$classCode = 'abstract class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
-		$expectedResult = 'abstract class SomePrefix_FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$expectedResult = 'abstract class SomePrefix_FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
 		$this->codeProcessor->setClassCode($classCode);
@@ -493,12 +493,12 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function classNameCanBeSuffixed() {
-		$classCode = 'abstract class FooBar extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$classCode = 'abstract class FooBar extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
-		$expectedResult = 'abstract class FooBar_SomeSuffix extends \F3\Fluid\TestingBla {
-	public function someMethod($arguments, \F3\Fluid\Subpackage\FooInterface $someFlow3Object) {
+		$expectedResult = 'abstract class FooBar_SomeSuffix extends \TYPO3\Fluid\TestingBla {
+	public function someMethod($arguments, \TYPO3\Fluid\Subpackage\FooInterface $someFlow3Object) {
 		foo();
 	}';
 		$this->codeProcessor->setClassCode($classCode);
@@ -516,14 +516,14 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \F3\Package\Subpac
  * Some header comment
  */
 
-abstract class FooBar extends \F3\Fluid\TestingBla {';
+abstract class FooBar extends \TYPO3\Fluid\TestingBla {';
 		$expectedResult = '<?php
 /*
  * Some header comment
  */
 
 // added header line
-abstract class FooBar extends \F3\Fluid\TestingBla {';
+abstract class FooBar extends \TYPO3\Fluid\TestingBla {';
 		$this->codeProcessor->setClassCode($classCode);
 		$this->codeProcessor->addClassHeader('// added header line');
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));

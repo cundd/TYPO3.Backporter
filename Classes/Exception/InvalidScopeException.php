@@ -1,9 +1,9 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\Exception;
+namespace TYPO3\Backporter\Exception;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the FLOW3 package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -27,7 +27,7 @@ namespace F3\Backporter\Exception;
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
-class InvalidScopeException extends \F3\FLOW3\Exception {
+class InvalidScopeException extends \TYPO3\FLOW3\Exception {
 
 }
 ?>

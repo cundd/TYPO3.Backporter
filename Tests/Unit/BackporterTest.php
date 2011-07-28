@@ -1,6 +1,6 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter;
+namespace TYPO3\Backporter;
 
 /*                                                                        *
  * This script belongs to the FLOW3 package "BackPorter".                 *
@@ -28,7 +28,7 @@ namespace F3\Backporter;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class BackporterTest extends \F3\FLOW3\Tests\UnitTestCase {
+class BackporterTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
 	protected $sourceFixturePath;
 	protected $targetFixturePath;
@@ -36,14 +36,14 @@ class BackporterTest extends \F3\FLOW3\Tests\UnitTestCase {
 
 	public function setUp() {
 		$this->markTestSkipped();
-		$this->sourceFixturePath = \F3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Source'));
-		$this->targetFixturePath = \F3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Target'));
-		$this->backporter = $this->getMock($this->buildAccessibleProxy('F3\Backporter\Backporter'), array('dummy'), array(), '', FALSE);
+		$this->sourceFixturePath = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Source'));
+		$this->targetFixturePath = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Target'));
+		$this->backporter = $this->getMock($this->buildAccessibleProxy('TYPO3\Backporter\Backporter'), array('dummy'), array(), '', FALSE);
 	}
 
 	/**
 	 * @test
-	 * @expectedException \F3\Backporter\Exception\InvalidPathException
+	 * @expectedException \TYPO3\Backporter\Exception\InvalidPathException
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function SetSourcePaththrowsExceptionIfSourcePathDoesNotExist() {
@@ -52,7 +52,7 @@ class BackporterTest extends \F3\FLOW3\Tests\UnitTestCase {
 
 	/**
 	 * @test
-	 * @expectedException \F3\Backporter\Exception\InvalidPathException
+	 * @expectedException \TYPO3\Backporter\Exception\InvalidPathException
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function SetTargetPaththrowsExceptionIfTargetPathDoesNotExist() {

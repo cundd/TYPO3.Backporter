@@ -1,9 +1,9 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\CodeProcessor;
+namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the FLOW3 package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -25,7 +25,6 @@ namespace F3\Backporter\CodeProcessor;
 /**
  * Collection of backport utility methods
  *
- * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
 abstract class AbstractCodeProcessor {
@@ -35,9 +34,9 @@ abstract class AbstractCodeProcessor {
 	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@scope\s+(?P<scope>[a-zA-Z]+).*\n/m';
 	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
 	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():\n])/m';
-	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>F3(?:\\\\\w+)+)/x';
+	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>TYPO3(?:\\\\\w+)+)/x';
 	const PATTERN_CLASS_SIGNATURE = '/(?<=^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)(?<parents>(\sextends\s(?<extends>[a-zA-Z0-9_\\\\]+))?(\simplements\s(?<implements>[a-zA-Z0-9_, \\\\]+))?)(?=\s*{$)/m';
-	const PATTERN_CLASS_NAME = '/F3\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
+	const PATTERN_CLASS_NAME = '/[A-Za-z0-9\.]+\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
 
 	const SCOPE_PROTOTYPE = 'prototype';
 	const SCOPE_SINGLETON = 'singleton';
@@ -162,7 +161,7 @@ abstract class AbstractCodeProcessor {
 			case self::SCOPE_SINGLETON:
 				return self::SCOPE_SINGLETON;
 			default:
-				throw new \F3\Backporter\Exception\InvalidScopeException('Invalid scope "' . $matches['scope'] . '"');
+				throw new \TYPO3\Backporter\Exception\InvalidScopeException('Invalid scope "' . $matches['scope'] . '"');
 		}
 	}
 
@@ -244,7 +243,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes the line "namespace F3/Package/Subpackage..." that appears on top of all FLOW3 classes.
+	 * Removes the line "namespace XYZ/Package/Subpackage..." that appears on top of all FLOW3 classes.
 	 *
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>

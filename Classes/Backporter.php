@@ -1,9 +1,9 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter;
+namespace TYPO3\Backporter;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the FLOW3 package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -25,7 +25,6 @@ namespace F3\Backporter;
 /**
  * Backporter main class
  *
- * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
 class Backporter {
@@ -63,7 +62,7 @@ class Backporter {
 	 *
 	 * @var string
 	 */
-	protected $codeProcessorClassName = 'F3\Backporter\CodeProcessor\DefaultClassCodeProcessor';
+	protected $codeProcessorClassName = 'TYPO3\Backporter\CodeProcessor\DefaultClassCodeProcessor';
 
 	/**
 	 * An array containing strings to be replaced. Key = search string, value = replacement string.
@@ -73,7 +72,7 @@ class Backporter {
 	protected $replacePairs = array();
 
 	/**
-	 * @var \F3\FLOW3\Object\ObjectManagerInterface
+	 * @var \TYPO3\FLOW3\Object\ObjectManagerInterface
 	 * @inject
 	 */
 	protected $objectManager;
@@ -216,22 +215,22 @@ class Backporter {
 		$this->setSourcePath($sourcePath);
 		$this->setTargetPath($targetPath);
 		if ($this->emptyTargetPath) {
-			\F3\FLOW3\Utility\Files::emptyDirectoryRecursively($this->targetPath);
+			\TYPO3\FLOW3\Utility\Files::emptyDirectoryRecursively($this->targetPath);
 		}
 		$this->findSourceFilenames();
 
 		$codeProcessor = $this->objectManager->get($this->codeProcessorClassName);
 		$codeProcessor->setExtensionKey($this->extensionKey);
 		foreach($this->sourceFilenames as $sourceFilename) {
-			$classCode = \F3\FLOW3\Utility\Files::getFileContents($sourceFilename);
+			$classCode = \TYPO3\FLOW3\Utility\Files::getFileContents($sourceFilename);
 			$relativeFilePath = substr($sourceFilename, strlen($this->sourcePath) + 1);
 
 			if (!$this->shouldFileBeProcessed($relativeFilePath)) {
 				continue;
 			}
-			$targetFilename = \F3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
+			$targetFilename = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
 			$targetFilename = $this->renameTargetFilename($targetFilename);
-			\F3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
+			\TYPO3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
 
 			$replacePairs = $this->replacePairs;
@@ -291,12 +290,12 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setSourcePath($sourcePath) {
-		$sourcePath =  \F3\FLOW3\Utility\Files::getUnixStylePath($sourcePath);
+		$sourcePath =  \TYPO3\FLOW3\Utility\Files::getUnixStylePath($sourcePath);
 		if (!is_dir($sourcePath)) {
-			throw new \F3\Backporter\Exception\InvalidPathException('sourcePath "' . $sourcePath . '" is no directory');
+			throw new \TYPO3\Backporter\Exception\InvalidPathException('sourcePath "' . $sourcePath . '" is no directory');
 		}
 		if (!is_readable($sourcePath)) {
-			throw new \F3\Backporter\Exception\InvalidPathException('sourcePath "' . $sourcePath . '" is not readable');
+			throw new \TYPO3\Backporter\Exception\InvalidPathException('sourcePath "' . $sourcePath . '" is not readable');
 		}
 		$this->sourcePath = rtrim($sourcePath, '/');
 	}
@@ -311,12 +310,12 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setTargetPath($targetPath) {
-		$targetPath = \F3\FLOW3\Utility\Files::getUnixStylePath($targetPath);
+		$targetPath = \TYPO3\FLOW3\Utility\Files::getUnixStylePath($targetPath);
 		if (!is_dir($targetPath)) {
-			\F3\FLOW3\Utility\Files::createDirectoryRecursively($targetPath);
+			\TYPO3\FLOW3\Utility\Files::createDirectoryRecursively($targetPath);
 		}
 		if (!is_writable($targetPath)) {
-			throw new \F3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not writable');
+			throw new \TYPO3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not writable');
 		}
 		$this->targetPath = rtrim($targetPath, '/');
 	}
@@ -328,7 +327,7 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	protected function findSourceFilenames() {
-		$this->sourceFilenames = \F3\FLOW3\Utility\Files::readDirectoryRecursively($this->sourcePath);
+		$this->sourceFilenames = \TYPO3\FLOW3\Utility\Files::readDirectoryRecursively($this->sourcePath);
 	}
 }
 ?>

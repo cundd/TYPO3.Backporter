@@ -1,6 +1,6 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\CodeProcessor;
+namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
  * This script belongs to the FLOW3 package "BackPorter".                 *
@@ -28,7 +28,7 @@ namespace F3\Backporter\CodeProcessor;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class DefaultClassCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
+class DefaultClassCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
 	/**
 	 * @test
@@ -37,7 +37,7 @@ class DefaultClassCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
 	public function simpleClassIsBackportedCorrectly() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
-namespace F3\SomePackage\MySubpackage;
+namespace TYPO3\SomePackage\MySubpackage;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -46,17 +46,17 @@ namespace F3\SomePackage\MySubpackage;
  /**
  */
 
-class SomeClass extends \F3\MyPackage\MySubpackage\SomeOtherClass implements \F3\MyPackage\SomeInterface {
+class SomeClass extends \TYPO3\MyPackage\MySubpackage\SomeOtherClass implements \TYPO3\MyPackage\SomeInterface {
 
 	/**
 	 * String to be replaced.
 	 *
 	 * @param \ArrayObject $arguments some documentation
-	 * @param \F3\MyPackage\SomeInterface $foo some documentation
+	 * @param \TYPO3\MyPackage\SomeInterface $foo some documentation
 	 * @return void
 	 */
-	public function someMethod(\ArrayObject $arguments, \F3\MyPackage\SomeInterface $foo) {
-		$bar = $objectFactory->create(\'F3\MyPackage\MySubpackage\ClassNameToBeReplaced\');
+	public function someMethod(\ArrayObject $arguments, \TYPO3\MyPackage\SomeInterface $foo) {
+		$bar = $objectFactory->create(\'TYPO3\MyPackage\MySubpackage\ClassNameToBeReplaced\');
 	}
 }
 ?>';
@@ -83,13 +83,13 @@ class Tx_MyExtension_MySubpackage_SomeClass extends Tx_MyExtension_MySubpackage_
 	}
 }
 ?>';
-		$codeProcessor = new \F3\Backporter\CodeProcessor\DefaultClassCodeProcessor();
+		$codeProcessor = new \TYPO3\Backporter\CodeProcessor\DefaultClassCodeProcessor();
 		$codeProcessor->setExtensionKey('MyExtension');
 		$codeProcessor->setClassCode($classCode);
 		$actualResult = $codeProcessor->processCode(
 			array(
 				'String to be replaced' => 'The replaced string',
-				'F3\MyPackage\MySubpackage\ClassNameToBeReplaced' => 'Tx_MyExtension_MySubpackage_ReplacedClassName'
+				'TYPO3\MyPackage\MySubpackage\ClassNameToBeReplaced' => 'Tx_MyExtension_MySubpackage_ReplacedClassName'
 			)
 		);
 		$this->assertEquals($expectedResult, $actualResult);

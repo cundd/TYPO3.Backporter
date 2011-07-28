@@ -1,6 +1,6 @@
 <?php
 declare(ENCODING = 'utf-8');
-namespace F3\Backporter\CodeProcessor;
+namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
  * This script belongs to the FLOW3 package "BackPorter".                 *
@@ -28,7 +28,7 @@ namespace F3\Backporter\CodeProcessor;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class TestClassCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
+class TestClassCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
 	/**
 	 * @test
@@ -37,7 +37,7 @@ class TestClassCodeProcessorTest extends \F3\FLOW3\Tests\UnitTestCase {
 	public function simpleTestClassIsBackportedCorrectly() {
 		$classCode = '<?php
 declare(ENCODING = \'utf-8\');
-namespace F3\SomePackage\MySubpackage;
+namespace TYPO3\SomePackage\MySubpackage;
 
 /*                                                                        *
  * This script is part of the TYPO3 project - inspiring people to share!  *
@@ -46,7 +46,7 @@ namespace F3\SomePackage\MySubpackage;
  /**
  */
 
-class SomeTest extends \F3\Testing\BaseTestCase {
+class SomeTest extends \TYPO3\Testing\BaseTestCase {
 
 	/**
 	 * String to be replaced
@@ -83,13 +83,13 @@ class Tx_MyExtension_MySubpackage_SomeTest extends Tx_Extbase_Base_testcase {
 	}
 }
 ?>';
-		$codeProcessor = new \F3\Backporter\CodeProcessor\TestClassCodeProcessor();
+		$codeProcessor = new \TYPO3\Backporter\CodeProcessor\TestClassCodeProcessor();
 		$codeProcessor->setExtensionKey('MyExtension');
 		$codeProcessor->setClassCode($classCode);
 		$actualResult = $codeProcessor->processCode(
 			array(
 				'String to be replaced' => 'The replaced string',
-				'F3\Testing\BaseTestCase' => 'Tx_Extbase_Base_testcase'
+				'TYPO3\Testing\BaseTestCase' => 'Tx_Extbase_Base_testcase'
 			)
 		);
 		$this->assertEquals($expectedResult, $actualResult);

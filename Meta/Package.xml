@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <package xmlns="http://typo3.org/ns/2008/flow3/package">
-    <key>Backporter</key>
+    <key>TYPO3.Backporter</key>
     <title>Backporter framework to backport certain parts of FLOW3 to v4</title>
     <description>Backporting</description>
     <version>0.5.0-dev</version>
