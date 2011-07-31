@@ -33,11 +33,15 @@ class DefaultClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\Abstract
 	 * Processes the FLOW3 code by calling the respective helper methods.
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @param array $fileSpecificReplacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @param array $unusedReplacePairs an array which should be initialized to the same value as $replacePairs. After calling processCode(), it contains only the $replacePairs which were not used during the replacement.
+	 * @param array $unusedFileSpecificReplacePairs an array which should be initialized to the same value as $fileSpecificReplacePairs. After calling processCode(), it contains only the $fileSpecificReplacePairs which were not used during the replacement.
 	 * @return string the processed code
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function processCode(array $replacePairs = array()) {
-		$this->replaceStrings($replacePairs);
+	function processCode(array $replacePairs, array $fileSpecificReplacePairs, array &$unusedReplacePairs, array&$unusedFileSpecificReplacePairs) {
+		$this->replaceStrings($replacePairs, $unusedReplacePairs);
+		$this->replaceStrings($fileSpecificReplacePairs, $unusedFileSpecificReplacePairs);
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();

@@ -101,9 +101,12 @@ abstract class AbstractCodeProcessor {
 	 * Processes the FLOW3 code by calling the respective helper methods.
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @param array $fileSpecificReplacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @param array $unusedReplacePairs an array which should be initialized to the same value as $replacePairs. After calling processCode(), it contains only the $replacePairs which were not used during the replacement.
+	 * @param array $unusedFileSpecificReplacePairs an array which should be initialized to the same value as $fileSpecificReplacePairs. After calling processCode(), it contains only the $fileSpecificReplacePairs which were not used during the replacement.
 	 * @return string the processed code
 	 */
-	abstract function processCode(array $replacePairs = array());
+	abstract function processCode(array $replacePairs, array $fileSpecificReplacePairs, array &$unusedReplacePairs, array&$unusedFileSpecificReplacePairs);
 
 	/**
 	 * Setter for the classes namespace
@@ -311,13 +314,14 @@ abstract class AbstractCodeProcessor {
 	 * Replaces all occurences of search strings in $replacePairs by their replace strings.
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
+	 * @param array $unusedReplacePairs an array which should be initialized to the same value as $replacePairs. After calling processCode(), it contains only the $replacePairs which were not used during the replacement.
 	 * @return void
 	 * @see replaceString()
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function replaceStrings(array $replacePairs = array()) {
+	public function replaceStrings(array $replacePairs, &$unusedReplacePairs) {
 		foreach($replacePairs as $searchString => $replaceString) {
-			$this->replaceString($searchString, $replaceString);
+			$this->replaceString($searchString, $replaceString, $unusedReplacePairs);
 		}
 	}
 
@@ -326,10 +330,15 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @param string $searchString string to search for
 	 * @param string $replaceString replacing string
+	 * @param array $unusedReplacePairs an array which should be initialized to the same value as $replacePairs. After calling processCode(), it contains only the $replacePairs which were not used during the replacement.
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function replaceString($searchString, $replaceString) {
+	public function replaceString($searchString, $replaceString, &$unusedReplacePairs) {
+		if (strpos($this->processedClassCode, $searchString) !== FALSE) {
+				// $searchString FOUND in class code -> we remove it from the "unset" array
+			unset($unusedReplacePairs[$searchString]);
+		}
 		$this->processedClassCode = str_replace($searchString, $replaceString, $this->processedClassCode);
 	}
 

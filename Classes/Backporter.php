@@ -221,6 +221,8 @@ class Backporter {
 
 		$codeProcessor = $this->objectManager->get($this->codeProcessorClassName);
 		$codeProcessor->setExtensionKey($this->extensionKey);
+
+		$unusedReplacePairs = $this->replacePairs;
 		foreach($this->sourceFilenames as $sourceFilename) {
 			$classCode = \TYPO3\FLOW3\Utility\Files::getFileContents($sourceFilename);
 			$relativeFilePath = substr($sourceFilename, strlen($this->sourcePath) + 1);
@@ -233,11 +235,21 @@ class Backporter {
 			\TYPO3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
 
-			$replacePairs = $this->replacePairs;
+			$fileSpecificReplacePairs = array();
+			$unusedFileSpecificReplacePairs = array();
 			if (isset($this->fileSpecificReplacePairs[$relativeFilePath]) && is_array($this->fileSpecificReplacePairs[$relativeFilePath])) {
-				$replacePairs = array_merge($replacePairs, $this->fileSpecificReplacePairs[$relativeFilePath]);
+				$fileSpecificReplacePairs = $this->fileSpecificReplacePairs[$relativeFilePath];
+				$unusedFileSpecificReplacePairs = $fileSpecificReplacePairs;
 			}
-			file_put_contents($targetFilename, $codeProcessor->processCode($replacePairs));
+			file_put_contents($targetFilename, $codeProcessor->processCode($this->replacePairs, $fileSpecificReplacePairs, $unusedReplacePairs, $unusedFileSpecificReplacePairs));
+			if (count($unusedFileSpecificReplacePairs)) {
+				echo '--- Unused file specific replace pairs: ' . $relativeFilePath . chr(10);
+				var_dump($unusedFileSpecificReplacePairs);
+			}
+		}
+		if (count($unusedReplacePairs)) {
+			echo '--- Unused replace pairs: ' . chr(10);
+			var_dump($unusedReplacePairs);
 		}
 	}
 
