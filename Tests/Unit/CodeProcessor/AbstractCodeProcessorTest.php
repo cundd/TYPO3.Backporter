@@ -22,6 +22,9 @@ namespace TYPO3\Backporter\CodeProcessor;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
+use Doctrine\ORM\Mapping as ORM;
+use TYPO3\FLOW3\Annotations as FLOW3;
+
 /**
  * Testcase for AbstractCodeProcessor
  *
@@ -133,7 +136,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
  * Some comments
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
- * @scope prototype
+ * @FLOW3\Scope("prototype")
  */
  class SomeClassname {';
 		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_PROTOTYPE;
@@ -151,7 +154,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
  * Some comments
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
- * @scope singleton
+ * @FLOW3\Scope("singleton")
  */
  class SomeClassname {';
 		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
@@ -166,7 +169,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 	public function classScopeSessionCanBeDetermined() {
 		$classCode = '
 /**
- * @scope session foo
+ * @FLOW3\Scope("session foo")
  * @someOtherAnnotation
  */
  class SomeClassname {';
@@ -202,7 +205,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 /**
  * Some comments
  *
- * @scope someNonExistingScope
+ * @FLOW3\Scope("someNonExistingScope")
  */
  class SomeClassname {';
 		$this->codeProcessor->setClassCode($classCode);
@@ -217,7 +220,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 		$classCode = '
 /**
  * some comment before
- * @scope prototype
+ * @FLOW3\Scope("prototype")
  * some comment after
  */
  class SomeClassname {';
@@ -261,7 +264,7 @@ class TemplateParser {
 class TemplateParser implements t3lib_Singleton {
 '),array('
 /**
- * @scope singleton
+ * @FLOW3\Scope("singleton")
  */
 class SomeClassname implements Some\Interface {
 ', '
@@ -271,7 +274,7 @@ class SomeClassname implements Some\Interface, t3lib_Singleton {
 '),array(
 '
 /**
- * @scope prototype
+ * @FLOW3\Scope("prototype")
  */
 class SomeClassname implements Some\Interface {
 ', '
@@ -281,7 +284,7 @@ class SomeClassname implements Some\Interface {
 '),array(
 '
 /**
- * @scope session
+ * @FLOW3\Scope("session")
  */
 class SomeClassname extends Some\Other\Class implements Some\Interface {
 ', '

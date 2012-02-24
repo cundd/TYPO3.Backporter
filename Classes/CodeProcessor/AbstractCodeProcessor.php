@@ -22,6 +22,9 @@ namespace TYPO3\Backporter\CodeProcessor;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
+use Doctrine\ORM\Mapping as ORM;
+use TYPO3\FLOW3\Annotations as FLOW3;
+
 /**
  * Collection of backport utility methods
  *
@@ -31,12 +34,13 @@ abstract class AbstractCodeProcessor {
 
 	const PATTERN_NAMESPACE_DECLARATION = '/^namespace\s+(?P<namespace>.*);\n/m';
 	const PATTERN_ENCODING_DECLARATION = '/^declare\(ENCODING = \'(?P<encoding>[^\']+)\'\);\n/m';
-	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@scope\s+(?P<scope>[a-zA-Z]+).*\n/m';
+	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@FLOW3\\\Scope\("(?P<scope>[a-zA-Z]+)"\).*\n/m';
 	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
 	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():\n])/m';
 	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>TYPO3(?:\\\\\w+)+)/x';
 	const PATTERN_CLASS_SIGNATURE = '/(?<=^)(?P<modifiers>(?P<abstract>abstract )?(?P<type>class|interface)\s)(?P<className>[a-zA-Z0-9_]+)(?<parents>(\sextends\s(?<extends>[a-zA-Z0-9_\\\\]+))?(\simplements\s(?<implements>[a-zA-Z0-9_, \\\\]+))?)(?=\s*{$)/m';
 	const PATTERN_CLASS_NAME = '/[A-Za-z0-9\.]+\\\\(?P<packageKey>[A-Za-z0-9]+)(?P<objectName>(?:\\\\\w+)+)/x';
+	const PATTERN_USE_STATEMENTS = '/^use\s+(?P<namespace>[^\s]+)(\s+as\s+)?(?P<alias>[^\s]+)?;\n/m';
 
 	const SCOPE_PROTOTYPE = 'prototype';
 	const SCOPE_SINGLETON = 'singleton';
@@ -169,7 +173,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes @scope annotation and adds t3lib_Singleton to the list of implemented interfaces
+	 * Removes @FLOW3\Scope annotation and adds t3lib_Singleton to the list of implemented interfaces
 	 * If the class is of scope singleton
 	 *
 	 * @return void
@@ -199,13 +203,23 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes @scope prototype|singleton|session annotations
+	 * Removes @FLOW3\Scope("prototype|singleton|session") annotations
 	 *
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function removeScopeAnnotation() {
 		$this->processedClassCode = preg_replace(self::PATTERN_SCOPE_ANNOTATION, '', $this->processedClassCode);
+	}
+
+	/**
+	 * Removes "use Some\Namespace as Alias" statements
+	 *
+	 * @return void
+	 * @author Bastian Waidelich <bastian@typo3.org>
+	 */
+	public function removeUseStatements() {
+		$this->processedClassCode = preg_replace(self::PATTERN_USE_STATEMENTS, '', $this->processedClassCode);
 	}
 
 	/**

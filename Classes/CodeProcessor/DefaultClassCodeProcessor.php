@@ -45,6 +45,7 @@ class DefaultClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\Abstract
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
+		$this->removeUseStatements();
 		$this->addPackageAndSubpackageAnnotations();
 		$this->transformClassName();
 		$this->processScopeAnnotation();

@@ -42,10 +42,10 @@ class TestClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\AbstractCod
 	function processCode(array $replacePairs, array $fileSpecificReplacePairs, array &$unusedReplacePairs, array&$unusedFileSpecificReplacePairs) {
 		$this->replaceStrings($replacePairs, $unusedReplacePairs);
 		$this->replaceStrings($fileSpecificReplacePairs, $unusedFileSpecificReplacePairs);
-		//$this->addClassHeader('require_once(t3lib_extMgm::extPath(\'extbase\', \'Tests/Base_testcase.php\'));');
 		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
+		$this->removeUseStatements();
 		$this->transformClassName();
 		$this->transformObjectNames();
 		return $this->processedClassCode;
