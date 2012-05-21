@@ -27,14 +27,7 @@ namespace TYPO3\Backporter\Controller;
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class StandardController extends \TYPO3\FLOW3\MVC\Controller\ActionController {
-
-	/**
-	 * Defines the supported request types of this controller
-	 *
-	 * @var array
-	 */
-	protected $supportedRequestTypes = array('TYPO3\FLOW3\MVC\CLI\Request');
+class StandardController extends \TYPO3\FLOW3\Mvc\Controller\ActionController {
 
 	/*
 	 * @param string $sourcePath
