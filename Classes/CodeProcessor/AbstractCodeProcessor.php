@@ -173,7 +173,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes @FLOW3\Scope annotation and adds t3lib_Singleton to the list of implemented interfaces
+	 * Removes Scope annotation and adds t3lib_Singleton to the list of implemented interfaces
 	 * If the class is of scope singleton
 	 *
 	 * @return void
@@ -203,7 +203,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes @FLOW3\Scope("prototype|singleton|session") annotations
+	 * Removes Scope("prototype|singleton|session") annotations
 	 *
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>
