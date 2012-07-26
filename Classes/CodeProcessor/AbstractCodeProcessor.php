@@ -1,5 +1,4 @@
 <?php
-declare(ENCODING = 'utf-8');
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
@@ -254,6 +253,7 @@ abstract class AbstractCodeProcessor {
 	 *
 	 * @return string the modified string
 	 * @author Bastian Waidelich <bastian@typo3.org>
+	 * @deprecated
 	 */
 	public function removeEncodingDeclaration() {
 		$this->processedClassCode = preg_replace(self::PATTERN_ENCODING_DECLARATION, '', $this->processedClassCode);
@@ -376,7 +376,8 @@ abstract class AbstractCodeProcessor {
 			$replacementsToBeDone['$this->' . $matches['methodName'] . '('] = '$this->' . $prefix . $matches['methodName'] . '(';
 			return $matches['modifiers'] . $prefix . $matches['methodName'];
 		}, $this->processedClassCode);
-		$this->replaceStrings($replacementsToBeDone);
+		$unusedReplacePairs = array();
+		$this->replaceStrings($replacementsToBeDone, $unusedReplacePairs);
 	}
 
 	/**

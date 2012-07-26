@@ -1,5 +1,4 @@
 <?php
-declare(ENCODING = 'utf-8');
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
@@ -42,7 +41,6 @@ class TestClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\AbstractCod
 	function processCode(array $replacePairs, array $fileSpecificReplacePairs, array &$unusedReplacePairs, array&$unusedFileSpecificReplacePairs) {
 		$this->replaceStrings($replacePairs, $unusedReplacePairs);
 		$this->replaceStrings($fileSpecificReplacePairs, $unusedFileSpecificReplacePairs);
-		$this->removeEncodingDeclaration();
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
 		$this->removeUseStatements();

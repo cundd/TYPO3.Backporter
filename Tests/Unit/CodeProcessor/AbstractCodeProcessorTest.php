@@ -1,5 +1,4 @@
 <?php
-declare(ENCODING = 'utf-8');
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
@@ -33,6 +32,9 @@ use TYPO3\FLOW3\Annotations as FLOW3;
  */
 class AbstractCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
+	/**
+	 * @var \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor
+	 */
 	protected $codeProcessor;
 
 	public function setUp() {
@@ -55,7 +57,6 @@ class AbstractCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 	 */
 	public function namespaceCanBeExtractedFromClassCode() {
 		$classCode = '<?php
-declare(ENCODING = \'utf-8\');
 namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
@@ -68,33 +69,12 @@ foobar';
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function EncodingDeclarationCanBeRemoved() {
-		$classCode = '<?php
-declare(ENCODING = \'utf-8\');
-namespace TYPO3\FLOW3\Cache\Frontend;
-
-foobar';
-		$expectedResult = '<?php
-namespace TYPO3\FLOW3\Cache\Frontend;
-
-foobar';
-		$this->codeProcessor->setClassCode($classCode);
-		$this->codeProcessor->removeEncodingDeclaration($classCode);
-		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
-	}
-
-	/**
-	 * @test
-	 * @author Bastian Waidelich <bastian@typo3.org>
-	 */
 	public function namespaceDeclarationsCanBeRemoved() {
 		$classCode = '<?php
-declare(ENCODING = \'utf-8\');
 namespace TYPO3\FLOW3\Cache\Frontend;
 
 foobar';
 		$expectedResult = '<?php
-declare(ENCODING = \'utf-8\');
 
 foobar';
 		$this->codeProcessor->setClassCode($classCode);
@@ -169,7 +149,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 	public function classScopeSessionCanBeDetermined() {
 		$classCode = '
 /**
- * @FLOW3\Scope("session foo")
+ * @FLOW3\Scope("session")
  * @someOtherAnnotation
  */
  class SomeClassname {';
@@ -182,7 +162,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 	 * @test
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
-	public function classScopeDefaultsToSingleton() {
+	public function classScopeDefaultsToPrototype() {
 		$classCode = '
 /**
  * Some comments
@@ -190,7 +170,7 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
  class SomeClassname {';
-		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_SINGLETON;
+		$expectedResult = \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor::SCOPE_PROTOTYPE;
 		$this->codeProcessor->setClassCode($classCode);
 		$this->assertEquals($expectedResult, $this->codeProcessor->getClassScope());
 	}
@@ -243,11 +223,11 @@ public function someMethod(ArrayObject $arguments, \TYPO3\FLOW3\Subpackage\FooIn
 			array('
 class SomeClassname {
 ', '
-class SomeClassname implements t3lib_Singleton {
+class SomeClassname {
 '),array('
 class SomeClassname extends Some\Other\Class {
 ', '
-class SomeClassname extends Some\Other\Class implements t3lib_Singleton {
+class SomeClassname extends Some\Other\Class {
 '),array('
 /**
  * Template parser building up an object syntax tree
@@ -261,7 +241,7 @@ class TemplateParser {
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
-class TemplateParser implements t3lib_Singleton {
+class TemplateParser {
 '),array('
 /**
  * @FLOW3\Scope("singleton")
@@ -389,7 +369,8 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \TYPO3\Package\Sub
 		$classCode = 'Foo bar foo Foo';
 		$expectedResult = 'Bar bar foo Bar';
 		$this->codeProcessor->setClassCode($classCode);
-		$this->codeProcessor->replaceString('Foo', 'Bar');
+		$unusedReplacePairs = array();
+		$this->codeProcessor->replaceString('Foo', 'Bar', $unusedReplacePairs);
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 
@@ -401,7 +382,8 @@ interface Tx_ExtensionKey_Subpackage_Some123Interface extends \TYPO3\Package\Sub
 		$classCode = 'Foo bar foo Foo';
 		$expectedResult = 'Bar foo foo Bar';
 		$this->codeProcessor->setClassCode($classCode);
-		$this->codeProcessor->replaceStrings(array('Foo' => 'Bar', 'bar' => 'foo'));
+		$unusedReplacePairs = array();
+		$this->codeProcessor->replaceStrings(array('Foo' => 'Bar', 'bar' => 'foo'), $unusedReplacePairs);
 		$this->assertEquals($expectedResult, $this->codeProcessor->_get('processedClassCode'));
 	}
 

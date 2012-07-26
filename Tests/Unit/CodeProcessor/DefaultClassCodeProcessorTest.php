@@ -1,5 +1,4 @@
 <?php
-declare(ENCODING = 'utf-8');
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
@@ -36,7 +35,6 @@ class DefaultClassCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 	 */
 	public function simpleClassIsBackportedCorrectly() {
 		$classCode = '<?php
-declare(ENCODING = \'utf-8\');
 namespace TYPO3\SomePackage\MySubpackage;
 
 /*                                                                        *
