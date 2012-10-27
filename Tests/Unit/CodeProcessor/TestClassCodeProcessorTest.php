@@ -2,7 +2,7 @@
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the Flow package "BackPorter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -27,7 +27,7 @@ namespace TYPO3\Backporter\CodeProcessor;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class TestClassCodeProcessorTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
+class TestClassCodeProcessorTest extends \TYPO3\Flow\Tests\UnitTestCase {
 
 	/**
 	 * @test

@@ -1,8 +1,8 @@
 <?php
-namespace TYPO3\Backporter;
+namespace TYPO3\Backporter\Exception;
 
 /*                                                                        *
- * This script belongs to the FLOW3 framework.                            *
+ * This script belongs to the Flow package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -22,9 +22,11 @@ namespace TYPO3\Backporter;
  *                                                                        */
 
 /**
+ * An "Invalid Scope" exception
+ *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
-class Package extends \TYPO3\FLOW3\Package\Package {
+class InvalidScopeException extends \TYPO3\Flow\Exception {
 
 }
 ?>

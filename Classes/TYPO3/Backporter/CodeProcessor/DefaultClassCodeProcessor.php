@@ -2,7 +2,7 @@
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "Backporter".                 *
+ * This script belongs to the Flow package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -22,14 +22,14 @@ namespace TYPO3\Backporter\CodeProcessor;
  *                                                                        */
 
 /**
- * Backporter for Test Classes
+ * Default Backporter
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class TestClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor {
+class DefaultClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\AbstractCodeProcessor {
 
 	/**
-	 * Processes the FLOW3 code by calling the respective helper methods.
+	 * Processes the Flow code by calling the respective helper methods.
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
 	 * @param array $fileSpecificReplacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
@@ -44,7 +44,9 @@ class TestClassCodeProcessor extends \TYPO3\Backporter\CodeProcessor\AbstractCod
 		$this->removeNamespaceDeclarations();
 		$this->removeGlobalNamespaceSeparators();
 		$this->removeUseStatements();
+		$this->addPackageAndSubpackageAnnotations();
 		$this->transformClassName();
+		$this->processScopeAnnotation();
 		$this->transformObjectNames();
 		return $this->processedClassCode;
 	}

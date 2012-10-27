@@ -2,7 +2,7 @@
 namespace TYPO3\Backporter\CodeProcessor;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "Backporter".                 *
+ * This script belongs to the Flow package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -22,7 +22,7 @@ namespace TYPO3\Backporter\CodeProcessor;
  *                                                                        */
 
 use Doctrine\ORM\Mapping as ORM;
-use TYPO3\FLOW3\Annotations as FLOW3;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
  * Collection of backport utility methods
@@ -33,7 +33,7 @@ abstract class AbstractCodeProcessor {
 
 	const PATTERN_NAMESPACE_DECLARATION = '/^namespace\s+(?P<namespace>.*);\n/m';
 	const PATTERN_ENCODING_DECLARATION = '/^declare\(ENCODING = \'(?P<encoding>[^\']+)\'\);\n/m';
-	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@FLOW3\\\Scope\("(?P<scope>[a-zA-Z]+)"\).*\n/m';
+	const PATTERN_SCOPE_ANNOTATION = '/^\s+\*\s@Flow\\\Scope\("(?P<scope>[a-zA-Z]+)"\).*\n/m';
 	const PATTERN_METHOD_SIGNATURES = '/(?<=^\s)(?P<modifiers>(?P<abstract>abstract )?(?P<visibilityModifier>public|private|protected)\s+function\s+)(?P<methodName>[^ (]+)/m';
 	const PATTERN_GLOBAL_OBJECT_NAMES = '/(?<=[( ])(?P<namespaceSeparator>\\\\)(?P<objectName>[a-zA-Z0-9_]{3,})(?=[ ():\n])/m';
 	const PATTERN_OBJECT_NAMES = '/\\\\?(?P<objectName>TYPO3(?:\\\\\w+)+)/x';
@@ -46,7 +46,7 @@ abstract class AbstractCodeProcessor {
 	const SCOPE_SESSION = 'session';
 
 	/**
-	 * Unmodified FLOW3 class code.
+	 * Unmodified Flow class code.
 	 *
 	 * @var string
 	 * @var string
@@ -54,7 +54,7 @@ abstract class AbstractCodeProcessor {
 	protected $originalClassCode = '';
 
 	/**
-	 * The processed FLOW3 class code.
+	 * The processed Flow class code.
 	 *
 	 * @var string
 	 */
@@ -89,9 +89,9 @@ abstract class AbstractCodeProcessor {
 	protected $upperCasedExtensionKey = '';
 
 	/**
-	 * Setter for the FLOW3 class code.
+	 * Setter for the Flow class code.
 	 *
-	 * @param string $classCode the FLOW3 class code to be processed.
+	 * @param string $classCode the Flow class code to be processed.
 	 * @return string the processed code
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
@@ -101,7 +101,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Processes the FLOW3 code by calling the respective helper methods.
+	 * Processes the Flow code by calling the respective helper methods.
 	 *
 	 * @param array $replacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
 	 * @param array $fileSpecificReplacePairs an array containing strings to be replaced. Key = search string, value = replacement string.
@@ -249,7 +249,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes the line "declare(ENCODING = 'utf-8');" that appears on top of all FLOW3 classes.
+	 * Removes the line "declare(ENCODING = 'utf-8');" that appears on top of all Flow classes.
 	 *
 	 * @return string the modified string
 	 * @author Bastian Waidelich <bastian@typo3.org>
@@ -260,7 +260,7 @@ abstract class AbstractCodeProcessor {
 	}
 
 	/**
-	 * Removes the line "namespace XYZ/Package/Subpackage..." that appears on top of all FLOW3 classes.
+	 * Removes the line "namespace XYZ/Package/Subpackage..." that appears on top of all Flow classes.
 	 *
 	 * @return void
 	 * @author Bastian Waidelich <bastian@typo3.org>

@@ -2,7 +2,7 @@
 namespace TYPO3\Backporter;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "Backporter".                 *
+ * This script belongs to the Flow package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -22,7 +22,7 @@ namespace TYPO3\Backporter;
  *                                                                        */
 
 use Doctrine\ORM\Mapping as ORM;
-use TYPO3\FLOW3\Annotations as FLOW3;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
  * Backporter main class
@@ -74,8 +74,8 @@ class Backporter {
 	protected $replacePairs = array();
 
 	/**
-	 * @var \TYPO3\FLOW3\Object\ObjectManagerInterface
-	 * @FLOW3\Inject
+	 * @var \TYPO3\Flow\Object\ObjectManagerInterface
+	 * @Flow\Inject
 	 */
 	protected $objectManager;
 
@@ -217,7 +217,7 @@ class Backporter {
 		$this->setSourcePath($sourcePath);
 		$this->setTargetPath($targetPath);
 		if ($this->emptyTargetPath) {
-			\TYPO3\FLOW3\Utility\Files::emptyDirectoryRecursively($this->targetPath);
+			\TYPO3\Flow\Utility\Files::emptyDirectoryRecursively($this->targetPath);
 		}
 		$this->findSourceFilenames();
 
@@ -226,15 +226,15 @@ class Backporter {
 
 		$unusedReplacePairs = $this->replacePairs;
 		foreach($this->sourceFilenames as $sourceFilename) {
-			$classCode = \TYPO3\FLOW3\Utility\Files::getFileContents($sourceFilename);
+			$classCode = \TYPO3\Flow\Utility\Files::getFileContents($sourceFilename);
 			$relativeFilePath = substr($sourceFilename, strlen($this->sourcePath) + 1);
 
 			if (!$this->shouldFileBeProcessed($relativeFilePath)) {
 				continue;
 			}
-			$targetFilename = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
+			$targetFilename = \TYPO3\Flow\Utility\Files::concatenatePaths(array($this->targetPath, $relativeFilePath));
 			$targetFilename = $this->renameTargetFilename($targetFilename);
-			\TYPO3\FLOW3\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
+			\TYPO3\Flow\Utility\Files::createDirectoryRecursively(dirname($targetFilename));
 			$codeProcessor->setClassCode($classCode);
 
 			$fileSpecificReplacePairs = array();
@@ -304,7 +304,7 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setSourcePath($sourcePath) {
-		$sourcePath =  \TYPO3\FLOW3\Utility\Files::getUnixStylePath($sourcePath);
+		$sourcePath =  \TYPO3\Flow\Utility\Files::getUnixStylePath($sourcePath);
 		if (!is_dir($sourcePath)) {
 			throw new \TYPO3\Backporter\Exception\InvalidPathException('sourcePath "' . $sourcePath . '" is no directory');
 		}
@@ -324,9 +324,9 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	public function setTargetPath($targetPath) {
-		$targetPath = \TYPO3\FLOW3\Utility\Files::getUnixStylePath($targetPath);
+		$targetPath = \TYPO3\Flow\Utility\Files::getUnixStylePath($targetPath);
 		if (!is_dir($targetPath)) {
-			\TYPO3\FLOW3\Utility\Files::createDirectoryRecursively($targetPath);
+			\TYPO3\Flow\Utility\Files::createDirectoryRecursively($targetPath);
 		}
 		if (!is_writable($targetPath)) {
 			throw new \TYPO3\Backporter\Exception\InvalidPathException('targetPath "' . $targetPath . '" is not writable');
@@ -341,7 +341,7 @@ class Backporter {
 	 * @author Bastian Waidelich <bastian@typo3.org>
 	 */
 	protected function findSourceFilenames() {
-		$this->sourceFilenames = \TYPO3\FLOW3\Utility\Files::readDirectoryRecursively($this->sourcePath);
+		$this->sourceFilenames = \TYPO3\Flow\Utility\Files::readDirectoryRecursively($this->sourcePath);
 	}
 }
 ?>

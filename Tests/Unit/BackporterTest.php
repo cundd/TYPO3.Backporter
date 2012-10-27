@@ -2,7 +2,7 @@
 namespace TYPO3\Backporter;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "BackPorter".                 *
+ * This script belongs to the Flow package "BackPorter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -27,7 +27,7 @@ namespace TYPO3\Backporter;
  * @version $Id$
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class BackporterTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
+class BackporterTest extends \TYPO3\Flow\Tests\UnitTestCase {
 
 	protected $sourceFixturePath;
 	protected $targetFixturePath;
@@ -35,8 +35,8 @@ class BackporterTest extends \TYPO3\FLOW3\Tests\UnitTestCase {
 
 	public function setUp() {
 		$this->markTestSkipped();
-		$this->sourceFixturePath = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Source'));
-		$this->targetFixturePath = \TYPO3\FLOW3\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Target'));
+		$this->sourceFixturePath = \TYPO3\Flow\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Source'));
+		$this->targetFixturePath = \TYPO3\Flow\Utility\Files::concatenatePaths(array(__DIR__, 'Fixture/Target'));
 		$this->backporter = $this->getMock($this->buildAccessibleProxy('TYPO3\Backporter\Backporter'), array('dummy'), array(), '', FALSE);
 	}
 

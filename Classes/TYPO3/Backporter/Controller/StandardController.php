@@ -1,8 +1,8 @@
 <?php
-namespace TYPO3\Backporter\Exception;
+namespace TYPO3\Backporter\Controller;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "Backporter".                 *
+ * This script belongs to the Flow package "Backporter".                 *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU Lesser General Public License as published by the *
@@ -22,11 +22,22 @@ namespace TYPO3\Backporter\Exception;
  *                                                                        */
 
 /**
- * An "Invalid Path" exception
+ * Packporter Default Controller
  *
- * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License, version 2
  */
-class InvalidPathException extends \TYPO3\FLOW3\Exception {
+class StandardController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
+	/*
+	 * @param string $sourcePath
+	 * @param string $targetPath
+	 * @param string $extensionKey
+	 */
+	public function indexAction($sourcePath, $targetPath, $extensionKey) {
+		$backporter = $this->objectManager->getObject('TYPO3\Backporter\Backporter');
+		$backporter->setExtensionKey($extensionKey);
+		$backporter->processFiles($sourcePath, $targetPath);
+		return 'files backported.';
+	}
 }
 ?>
